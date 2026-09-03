@@ -9,9 +9,9 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$Version = '1.0.2'
-$Revision = 'R3'
-$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R3.bat'
+$Version = '1.0.3'
+$Revision = 'R4'
+$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R4.bat'
 $PackageName = "QuietShield-Chrome-$Version-$Revision.zip"
 
 function Write-Step([string]$Text) {
@@ -94,6 +94,46 @@ function Invoke-GitChecked {
     }
 }
 
+function New-LoadUnpackedFolder {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectRoot
+    )
+
+    $target = Join-Path $ProjectRoot 'LOAD-UNPACKED'
+    if (Test-Path -LiteralPath $target) {
+        Remove-Item -LiteralPath $target -Recurse -Force
+    }
+
+    New-Item -ItemType Directory -Path $target -Force | Out-Null
+
+    foreach ($name in @('manifest.json', 'assets', 'src')) {
+        $source = Join-Path $ProjectRoot $name
+        if (-not (Test-Path -LiteralPath $source)) {
+            Fail "Cannot create LOAD-UNPACKED because required runtime item is missing: $name"
+        }
+        Copy-Item -LiteralPath $source -Destination $target -Recurse -Force
+    }
+
+    $readyManifest = Join-Path $target 'manifest.json'
+    if (-not (Test-Path -LiteralPath $readyManifest -PathType Leaf)) {
+        Fail 'LOAD-UNPACKED was created without manifest.json.'
+    }
+
+    try {
+        $readyManifestJson = Get-Content -LiteralPath $readyManifest -Raw | ConvertFrom-Json
+    } catch {
+        Fail "LOAD-UNPACKED manifest.json is invalid JSON: $($_.Exception.Message)"
+    }
+
+    if ([int]$readyManifestJson.manifest_version -ne 3 -or [string]$readyManifestJson.version -ne $Version) {
+        Fail 'LOAD-UNPACKED manifest identity does not match the validated R4 runtime.'
+    }
+
+    Write-Host "[PASS] Chrome Load Unpacked folder ready: $target" -ForegroundColor Green
+    return $target
+}
+
 Write-Host '============================================================'
 Write-Host "QuietShield Chrome $Version $Revision - CLEAN BUILD + TWO-REPO PUBLISHER"
 Write-Host 'Run normally - DO NOT Run as Administrator.'
@@ -126,7 +166,7 @@ if ($scriptRoot -ine $canonicalFull) {
     }
 
     $preserveNames = @('.git')
-    $ephemeralNames = @('release-out', '.release-work')
+    $ephemeralNames = @('release-out', '.release-work', 'LOAD-UNPACKED')
     $existingItems = @(
         Get-ChildItem -LiteralPath $CanonicalRoot -Force -ErrorAction SilentlyContinue |
             Where-Object { $preserveNames -notcontains $_.Name }
@@ -266,6 +306,14 @@ if ($csp -match '(?i)https?://') {
 }
 
 $seenRuleIds = [System.Collections.Generic.HashSet[int]]::new()
+$validDnrResourceTypes = [System.Collections.Generic.HashSet[string]]::new(
+    [string[]]@(
+        'main_frame', 'sub_frame', 'stylesheet', 'script', 'image', 'font',
+        'object', 'xmlhttprequest', 'ping', 'csp_report', 'media', 'websocket',
+        'webtransport', 'webbundle', 'other'
+    ),
+    [System.StringComparer]::Ordinal
+)
 foreach ($resource in @($manifest.declarative_net_request.rule_resources)) {
     $resourcePath = [string]$resource.path
     Assert-LocalExtensionPath -Path $resourcePath -Label 'declarative_net_request.rule_resources.path'
@@ -281,6 +329,21 @@ foreach ($resource in @($manifest.declarative_net_request.rule_resources)) {
         $ruleId = [int]$rule.id
         if (-not $seenRuleIds.Add($ruleId)) {
             Fail "Duplicate declarativeNetRequest rule id detected: $ruleId"
+        }
+
+        $resourceTypesProperty = $rule.condition.PSObject.Properties['resourceTypes']
+        if ($null -ne $resourceTypesProperty) {
+            foreach ($resourceType in @($resourceTypesProperty.Value)) {
+                $resourceTypeText = [string]$resourceType
+                if (-not $validDnrResourceTypes.Contains($resourceTypeText)) {
+                    Fail (
+                        "Unsupported Chrome declarativeNetRequest ResourceType '$resourceTypeText'." +
+                        "`nRuleset: $resourcePath" +
+                        "`nRule id: $ruleId" +
+                        "`nAllowed values: " + (($validDnrResourceTypes | Sort-Object) -join ', ')
+                    )
+                }
+            }
         }
     }
 }
@@ -302,14 +365,14 @@ Write-Host '[PASS] Manifest V3 validation passed.' -ForegroundColor Green
 Write-Host '[PASS] Runtime remote-code scan passed.' -ForegroundColor Green
 Write-Host '[PASS] DNR ruleset validation passed.' -ForegroundColor Green
 
-# R3 release contracts: no customer-facing developer endpoint override, no
+# R4 release contracts: no customer-facing developer endpoint override, no
 # hardcoded administrator credential, and the built-in service endpoint must
 # live only in the background licensing client.
 $runtimeTextFiles = @($jsFiles + $htmlFiles)
 Assert-TextPatternAbsent `
     -Files $runtimeTextFiles `
     -Pattern '(?i)Developer Configuration|QS_SET_LICENSE_ENDPOINT|endpoint override|Use built-in endpoint' `
-    -FailureLabel 'Customer-facing developer endpoint configuration was found in R3.'
+    -FailureLabel 'Customer-facing developer endpoint configuration was found in R4.'
 
 Assert-TextPatternAbsent `
     -Files $runtimeTextFiles `
@@ -327,10 +390,13 @@ if ($endpointHits.Count -ne 1 -or $endpointHits[0].Path -notlike '*\src\backgrou
 $packageBat = @(Get-ChildItem -LiteralPath $CanonicalRoot -File -Filter '*.bat')
 $packagePs1 = @(Get-ChildItem -LiteralPath (Join-Path $CanonicalRoot 'scripts') -File -Filter '*.ps1')
 if ($packageBat.Count -ne 1 -or $packagePs1.Count -ne 1) {
-    Fail 'R3 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
+    Fail 'R4 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
 }
 
-Write-Host '[PASS] R3 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
+Write-Host '[PASS] R4 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
+
+Write-Step 'Create Chrome Load Unpacked folder'
+$loadUnpackedPath = New-LoadUnpackedFolder -ProjectRoot $CanonicalRoot
 
 Write-Step 'Git source repository'
 
@@ -361,7 +427,7 @@ Invoke-GitChecked -Arguments @('add', '-A') -FailureMessage 'git add failed for 
 $changes = (& $script:GitExe status --porcelain | Out-String).Trim()
 if ($changes) {
     Invoke-GitChecked `
-        -Arguments @('commit', '-m', "QuietShield Chrome $Version $Revision fully functional dashboard and protection engine") `
+        -Arguments @('commit', '-m', "QuietShield Chrome $Version $Revision R4 Chrome DNR resource-type compatibility fix") `
         -FailureMessage 'Source repository commit failed.'
 } else {
     Write-Host '[INFO] Source repository has no uncommitted changes.' -ForegroundColor DarkGray
@@ -382,7 +448,7 @@ New-Item -ItemType Directory -Path $outDir | Out-Null
 $stage = Join-Path $outDir 'stage'
 New-Item -ItemType Directory -Path $stage | Out-Null
 
-$excludeTop = @('.git', 'release-out', '.release-work')
+$excludeTop = @('.git', 'release-out', '.release-work', 'LOAD-UNPACKED')
 Get-ChildItem -LiteralPath $CanonicalRoot -Force |
     Where-Object { $excludeTop -notcontains $_.Name } |
     ForEach-Object {
@@ -475,4 +541,6 @@ Write-Step 'Complete'
 Write-Host "[PASS] Source published: $SourceRepo" -ForegroundColor Green
 Write-Host "[PASS] Release published: $ReleaseRepo" -ForegroundColor Green
 Write-Host "[PASS] Package: $zipPath" -ForegroundColor Green
+Write-Host "[PASS] Chrome Load Unpacked folder: $loadUnpackedPath" -ForegroundColor Green
+Write-Host '[INFO] In Chrome: chrome://extensions -> Developer mode -> Load unpacked -> select the LOAD-UNPACKED folder above.' -ForegroundColor Cyan
 Write-Host "[PASS] SHA-256: $hash" -ForegroundColor Green

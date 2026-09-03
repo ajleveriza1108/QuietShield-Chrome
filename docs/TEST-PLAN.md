@@ -1,6 +1,6 @@
-# QuietShield Chrome 1.0.2 R3 acceptance plan
+# QuietShield Chrome 1.0.3 R4 acceptance plan
 
-R3 is not considered complete merely because the GUI loads.
+R4 is not considered complete merely because the GUI loads.
 
 ## Gate A - installation
 - Load `D:\Windows Projects\QuietShield-Chrome` unpacked in Chrome 120+.

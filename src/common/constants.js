@@ -26,8 +26,8 @@ export const REDIRECT_DOMAINS = Object.freeze([
 ]);
 
 export const QS = Object.freeze({
-  VERSION: '1.0.2',
-  REVISION: 'R3',
+  VERSION: '1.0.3',
+  REVISION: 'R4',
   PLATFORM: 'Chrome',
   PACKAGE_NAME: 'quietshield.chrome',
   RULESETS: Object.freeze(['qs_ads','qs_trackers','qs_security','qs_redirects','qs_upgrade']),

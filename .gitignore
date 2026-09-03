@@ -7,3 +7,4 @@ Thumbs.db
 release-out/
 .release-work/
 node_modules/
+LOAD-UNPACKED/

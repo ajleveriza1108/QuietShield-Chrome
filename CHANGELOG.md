@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.3 R4
+
+- Fixed Chrome DNR ruleset parsing failure caused by unsupported `worker` ResourceType in `security-rules.json`.
+- Security blocking now uses Chrome-supported request types while retaining main-frame, sub-frame, script, XHR, WebSocket and other coverage.
+- Added publisher validation that rejects any unsupported Chrome `declarativeNetRequest` ResourceType before Git publication or release packaging.
+- Preserved the R3 GUI, licensing, protection engine, hidden endpoint configuration, and Code372 backend integration.
+- Publisher now automatically recreates a clean `LOAD-UNPACKED` folder containing only `manifest.json`, `assets`, and `src` for direct selection in Chrome.
+
 ## 1.0.2 R3
 
 - Replaced the foundation UI with the approved QuietShield dark dashboard and compact popup.

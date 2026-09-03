@@ -1,8 +1,11 @@
-# QuietShield Chrome 1.0.2 R3
+# QuietShield Chrome 1.0.3 R4
 
 QuietShield Chrome is a Manifest V3 privacy and ad-blocking extension that uses the same QuietShield product identity and shared licensing backend as the other QuietShield clients.
 
-## R3 goals
+## R4 goals
+
+R4 is the Chrome compatibility correction for the R3 functional dashboard. It removes the unsupported DNR `worker` ResourceType that Chrome rejects and adds a build-time schema gate so the same error cannot be published again.
+
 
 - Real ad/tracker request blocking with packaged Declarative Net Request rules.
 - Real per-site Protected / Trusted / Blocked controls.
@@ -37,11 +40,11 @@ Before Chrome activation can pass, deploy the matching same-server Code372 integ
 
 Run normally, not as Administrator:
 
-`START-PUBLISH-QUIETSHIELD-CHROME-R3.bat`
+`START-PUBLISH-QUIETSHIELD-CHROME-R4.bat`
 
 Requirements:
 - PowerShell 7
 - Git for Windows
 - Git identity and GitHub authentication already configured
 
-The publisher installs cleanly to `D:\Windows Projects\QuietShield-Chrome`, preserves `.git`, validates the MV3 package, builds the release ZIP, and pushes both QuietShield Chrome repositories.
+The publisher installs cleanly to `D:\Windows Projects\QuietShield-Chrome`, preserves `.git`, validates the MV3 package, creates `D:\Windows Projects\QuietShield-Chrome\LOAD-UNPACKED` containing only `manifest.json`, `assets`, and `src`, builds the release ZIP, and pushes both QuietShield Chrome repositories. Select that `LOAD-UNPACKED` folder directly in `chrome://extensions` -> Developer mode -> Load unpacked.

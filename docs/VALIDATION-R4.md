@@ -1,10 +1,12 @@
-# QuietShield Chrome 1.0.2 R3 validation
+# QuietShield Chrome 1.0.3 R4 validation
 
-Validation performed on the final R3 tree before packaging.
+Validation performed on the final R4 tree before packaging.
+
+R4 specifically fixes Chrome's `security-rules.json` parse error: `worker` is not a valid Chrome declarativeNetRequest ResourceType. The value is removed and the publisher now enforces Chrome's supported ResourceType allow-list.
 
 ## Passed here
 
-- Manifest parses as JSON, `manifest_version = 3`, version `1.0.2`.
+- Manifest parses as JSON, `manifest_version = 3`, version `1.0.3`.
 - All five packaged DNR rulesets parse and use unique rule IDs.
 - All manifest-referenced local service-worker, popup, options, content-script and DNR files exist.
 - All 8 extension JavaScript files pass Node.js 22.16.0 syntax checking.
@@ -24,14 +26,16 @@ Validation performed on the final R3 tree before packaging.
   - administrator activation key is not persisted as `qs.licenseKey`.
 - Chromium 144.0.7559.96 `--pack-extension` accepted the final extension tree with exit code 0.
 - Temporary Chromium-generated CRX/PEM validation artifacts were deleted and are not in this package.
+- Publisher now recreates `D:\Windows Projects\QuietShield-Chrome\LOAD-UNPACKED` from the validated `manifest.json`, `assets`, and `src` runtime only.
+- The exact ready-to-load folder structure (`manifest.json`, `assets`, `src`) passed the same static checks and Chromium 144 `--pack-extension` validation with exit code 0.
 
 ## Must run on the user's Windows environment
 
-- PowerShell 7 parses and executes `scripts/PUBLISH-QUIETSHIELD-CHROME-R3.ps1`. The BAT performs this parser gate before modifying the canonical project.
+- The BAT performs a PowerShell 7 parser gate on `scripts/PUBLISH-QUIETSHIELD-CHROME-R4.ps1` before modifying the canonical project. PowerShell 7 is not installed in this build container, so the Windows parser/runtime gate must run on the user's machine.
 - Source and release GitHub pushes authenticate successfully.
 - Live Apps Script licensing works after Code372 is deployed to the existing QuietShield web-app deployment.
 - Real Chrome browsing acceptance tests from `docs/TEST-PLAN.md`.
 
 ## Licensing dependency
 
-The currently deployed pre-Code372 server can reject Chrome with `PACKAGE_NOT_AUTHORIZED`. Deploy the supplied `QuietShield_License_Server_v1.2.6_Code372_Chrome_R3.gs` to the SAME QuietShield Apps Script project/deployment before judging live Chrome activation.
+The currently deployed pre-Code372 server can reject Chrome with `PACKAGE_NOT_AUTHORIZED`. Deploy the supplied `QuietShield_License_Server_v1.2.6_Code372_Chrome.gs` to the SAME QuietShield Apps Script project/deployment before judging live Chrome activation.

@@ -2,10 +2,34 @@
   {
     "id": 3001,
     "priority": 30,
-    "action": {"type":"block"},
+    "action": {
+      "type": "block"
+    },
     "condition": {
-      "requestDomains": ["coinhive.com","coin-hive.com","authedmine.com","crypto-loot.com","cryptoloot.pro","coinimp.com","jsecoin.com","webminepool.com","minero.cc","malware.testcategory.com","malware.test","phishing.test","badware.test","command-control.test"],
-      "resourceTypes": ["main_frame","sub_frame","script","worker","xmlhttprequest","websocket","other"]
+      "requestDomains": [
+        "coinhive.com",
+        "coin-hive.com",
+        "authedmine.com",
+        "crypto-loot.com",
+        "cryptoloot.pro",
+        "coinimp.com",
+        "jsecoin.com",
+        "webminepool.com",
+        "minero.cc",
+        "malware.testcategory.com",
+        "malware.test",
+        "phishing.test",
+        "badware.test",
+        "command-control.test"
+      ],
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "websocket",
+        "other"
+      ]
     }
   }
 ]
