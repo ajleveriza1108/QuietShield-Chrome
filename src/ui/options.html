@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QuietShield Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+<main class="page">
+  <header><div><h1>QuietShield</h1><p>Browser Protection Center</p></div><span class="version">v1.0.1 R2</span></header>
+
+  <section class="panel">
+    <h2>Protection</h2>
+    <label class="setting"><span><b>Cosmetic cleanup</b><small>Hide common ad containers and page annoyances after network filtering.</small></span><input id="cosmeticFiltering" type="checkbox"></label>
+    <label class="setting"><span><b>Tracking parameter cleanup</b><small>Remove common campaign and click-tracking parameters from the current page URL.</small></span><input id="trackingParamCleanup" type="checkbox"></label>
+    <label class="setting"><span><b>Network Inspector</b><small>Observe request domains in memory for the active tab. Detailed browsing history remains off by default.</small></span><input id="networkInspector" type="checkbox"></label>
+  </section>
+
+  <section class="panel">
+    <h2>QuietShield license</h2>
+    <p class="note">Uses the existing QuietShield Apps Script and the same customer keys. Chrome identifies itself as <code>quietshield.chrome</code>; the server integration patch in <code>docs/APPS-SCRIPT-CHROME-INTEGRATION.md</code> must be deployed once before Chrome activations are accepted.</p>
+    <label>License key<input id="licenseKey" type="password" autocomplete="off" spellcheck="false" placeholder="QS-..."></label>
+    <div class="actions"><button id="activate">Activate license</button><button id="trial" class="outline">Start / restore 7-day trial</button><button id="refreshLicense" class="outline">Refresh license</button></div>
+    <div id="licenseStatus" class="status">Not checked.</div>
+    <div class="device-tools"><button id="loadDevices" class="outline">My licensed devices</button><div id="deviceList" class="device-list" hidden></div></div>
+  </section>
+
+  <section class="panel dev">
+    <h2>Developer configuration</h2>
+    <p class="note">R2 contains the existing public QuietShield Apps Script endpoint. Use this override only when testing a newer deployment. Server secrets and private signing keys are never stored here.</p>
+    <label>Apps Script endpoint<input id="endpoint" type="url" placeholder="https://script.google.com/macros/s/.../exec"></label>
+    <div class="actions"><button id="saveEndpoint" class="outline">Save endpoint override</button><button id="resetEndpoint" class="outline">Use built-in endpoint</button></div>
+  </section>
+
+  <section class="panel">
+    <h2>Privacy</h2>
+    <p class="note">Network Inspector request-domain data stays in service-worker memory. Aggregate protection counters may be stored locally; detailed browsing history is not enabled. License keys are excluded from the planned backup/export contract.</p>
+  </section>
+</main>
+<script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QuietShield</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <div class="brand">QuietShield</div>
+        <div id="site" class="site">Current site</div>
+      </div>
+      <label class="switch" title="Protection">
+        <input id="enabled" type="checkbox">
+        <span></span>
+      </label>
+    </header>
+
+    <section class="hero">
+      <div id="statusDot" class="status-dot"></div>
+      <div>
+        <strong id="statusText">Protected</strong>
+        <p id="statusSub">Browser protection is active.</p>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div><strong id="blocked">0</strong><span>Blocked on page</span></div>
+      <div><strong id="requests">0</strong><span>Observed requests</span></div>
+      <div><strong id="cleaned">0</strong><span>Tracking params cleaned</span></div>
+    </section>
+
+    <section class="card">
+      <div class="row-title">Site protection</div>
+      <div class="segmented">
+        <button data-mode="protected" class="mode">Protected</button>
+        <button data-mode="trusted" class="mode">Trust</button>
+        <button data-mode="blocked" class="mode danger">Block</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row-title">Network Inspector</div>
+      <div id="domains" class="domains"><div class="muted">No traffic captured yet.</div></div>
+    </section>
+
+    <footer>
+      <button id="settings" class="secondary">Settings & License</button>
+    </footer>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
