@@ -1,0 +1,11 @@
+[
+  {
+    "id": 2001,
+    "priority": 10,
+    "action": {"type":"block"},
+    "condition": {
+      "requestDomains": ["google-analytics.com","analytics.google.com","googletagmanager.com","connect.facebook.net","facebook.net","bat.bing.com","clarity.ms","hotjar.com","hotjar.io","segment.com","segment.io","mixpanel.com","amplitude.com","scorecardresearch.com","quantserve.com","comscore.com","chartbeat.com","branch.io","appsflyer.com","adjust.com","app-measurement.com","flurry.com","kochava.com","matomo.cloud","newrelic.com","nr-data.net","fullstory.com","mouseflow.com","crazyegg.com","luckyorange.com","heap.io","heapanalytics.com","optimizely.com","kissmetrics.io","plausible.io","posthog.com","sentry.io"],
+      "resourceTypes": ["script","image","xmlhttprequest","sub_frame","ping","other","websocket"]
+    }
+  }
+]

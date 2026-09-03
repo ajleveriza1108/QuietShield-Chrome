@@ -3,41 +3,80 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>QuietShield Settings</title>
+  <title>QuietShield Dashboard</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
-<main class="page">
-  <header><div><h1>QuietShield</h1><p>Browser Protection Center</p></div><span class="version">v1.0.1 R2</span></header>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="side-brand"><img src="../../assets/icon-128.png" alt=""><div><b>QuietShield</b><span>Chrome</span></div></div>
+    <nav>
+      <button data-section="home" class="nav active"><span>⌂</span>Home</button>
+      <button data-section="protection" class="nav"><span>◈</span>Protection</button>
+      <button data-section="sites" class="nav"><span>◎</span>Sites</button>
+      <button data-section="activity" class="nav"><span>▥</span>Activity</button>
+      <button data-section="license" class="nav"><span>▣</span>License</button>
+      <button data-section="settings" class="nav"><span>⚙</span>Settings</button>
+    </nav>
+    <div class="side-status"><div class="round-shield"><img src="../../assets/icon-48.png" alt=""></div><div><span>Protection</span><b id="sideProtection">ON</b></div><p id="sideProtectionText">QuietShield is actively protecting you.</p></div>
+    <div class="side-footer">v1.0.2 R3 <span>•</span> <button data-section="about" class="link-nav">About</button></div>
+  </aside>
 
-  <section class="panel">
-    <h2>Protection</h2>
-    <label class="setting"><span><b>Cosmetic cleanup</b><small>Hide common ad containers and page annoyances after network filtering.</small></span><input id="cosmeticFiltering" type="checkbox"></label>
-    <label class="setting"><span><b>Tracking parameter cleanup</b><small>Remove common campaign and click-tracking parameters from the current page URL.</small></span><input id="trackingParamCleanup" type="checkbox"></label>
-    <label class="setting"><span><b>Network Inspector</b><small>Observe request domains in memory for the active tab. Detailed browsing history remains off by default.</small></span><input id="networkInspector" type="checkbox"></label>
-  </section>
+  <main class="content">
+    <section id="section-home" class="view active">
+      <div class="page-head"><div><h1>Dashboard</h1><p>Your privacy, under your control.</p></div><div class="updated">Local protection status <span class="dot"></span></div></div>
+      <div class="summary-grid">
+        <article><div class="metric-icon">◈</div><div><span>Ads Blocked</span><strong id="sumAds">0</strong><small>Local protection hits</small></div></article>
+        <article><div class="metric-icon">◎</div><div><span>Trackers Blocked</span><strong id="sumTrackers">0</strong><small>Local protection hits</small></div></article>
+        <article><div class="metric-icon warn">△</div><div><span>Threats Blocked</span><strong id="sumThreats">0</strong><small>Threat/mining rules</small></div></article>
+        <article><div class="metric-icon">⌁</div><div><span>Privacy Cleanups</span><strong id="sumCleanups">0</strong><small>Ads + URL cleanup</small></div></article>
+      </div>
 
-  <section class="panel">
-    <h2>QuietShield license</h2>
-    <p class="note">Uses the existing QuietShield Apps Script and the same customer keys. Chrome identifies itself as <code>quietshield.chrome</code>; the server integration patch in <code>docs/APPS-SCRIPT-CHROME-INTEGRATION.md</code> must be deployed once before Chrome activations are accepted.</p>
-    <label>License key<input id="licenseKey" type="password" autocomplete="off" spellcheck="false" placeholder="QS-..."></label>
-    <div class="actions"><button id="activate">Activate license</button><button id="trial" class="outline">Start / restore 7-day trial</button><button id="refreshLicense" class="outline">Refresh license</button></div>
-    <div id="licenseStatus" class="status">Not checked.</div>
-    <div class="device-tools"><button id="loadDevices" class="outline">My licensed devices</button><div id="deviceList" class="device-list" hidden></div></div>
-  </section>
+      <div id="homeFeatureGrid" class="feature-grid"></div>
 
-  <section class="panel dev">
-    <h2>Developer configuration</h2>
-    <p class="note">R2 contains the existing public QuietShield Apps Script endpoint. Use this override only when testing a newer deployment. Server secrets and private signing keys are never stored here.</p>
-    <label>Apps Script endpoint<input id="endpoint" type="url" placeholder="https://script.google.com/macros/s/.../exec"></label>
-    <div class="actions"><button id="saveEndpoint" class="outline">Save endpoint override</button><button id="resetEndpoint" class="outline">Use built-in endpoint</button></div>
-  </section>
+      <div class="lower-grid">
+        <article class="card activity-card"><div class="card-head"><div><b>Activity</b><span>Last 7 days</span></div><button data-section="activity" class="link-nav">View full report</button></div><div id="homeBars" class="bars"></div><div class="legend"><span><i class="green"></i>Ads</span><span><i class="amber"></i>Trackers</span><span><i class="red"></i>Threats</span></div></article>
+        <article class="card score-card"><div class="card-head"><b>Your Privacy Score</b></div><div id="privacyGauge" class="gauge"><strong id="privacyScore">0</strong></div><b id="privacyLabel" class="score-label">Protection off</b><p id="privacyText">Turn on QuietShield protection to improve your score.</p></article>
+      </div>
 
-  <section class="panel">
-    <h2>Privacy</h2>
-    <p class="note">Network Inspector request-domain data stays in service-worker memory. Aggregate protection counters may be stored locally; detailed browsing history is not enabled. License keys are excluded from the planned backup/export contract.</p>
-  </section>
-</main>
+      <article class="card site-preview"><div class="card-head"><div><b>Per-site Controls</b><span>Customize protection for specific sites.</span></div><button data-section="sites" class="link-nav">Manage Sites ›</button></div><div id="sitePreview" class="site-preview-list"></div></article>
+    </section>
+
+    <section id="section-protection" class="view">
+      <div class="page-head"><div><h1>Protection</h1><p>Every switch below controls a real QuietShield protection layer.</p></div></div>
+      <article class="card master-setting"><div><b>Master Protection</b><p>Pause or resume all QuietShield network and page protections.</p></div><label class="switch big"><input id="masterEnabled" type="checkbox"><span></span></label></article>
+      <div id="protectionFeatureGrid" class="feature-grid large"></div>
+    </section>
+
+    <section id="section-sites" class="view">
+      <div class="page-head"><div><h1>Sites</h1><p>Trust a site, protect it normally, or block it completely.</p></div></div>
+      <article class="card add-site"><input id="siteInput" type="text" placeholder="example.com" spellcheck="false"><select id="siteModeInput"><option value="protected">Protected</option><option value="trusted">Trusted</option><option value="blocked">Blocked</option></select><button id="saveSite">Save site rule</button></article>
+      <article class="card"><div class="card-head"><b>Saved site rules</b><span id="siteCount">0 custom rules</span></div><div id="siteList" class="site-list"></div></article>
+    </section>
+
+    <section id="section-activity" class="view">
+      <div class="page-head"><div><h1>Activity</h1><p>Aggregate local protection statistics. QuietShield does not need a detailed browsing-history log for this report.</p></div><button id="clearActivity" class="danger-outline">Clear activity</button></div>
+      <div class="summary-grid compact"><article><div><span>Ads Blocked</span><strong id="actAds">0</strong></div></article><article><div><span>Trackers Blocked</span><strong id="actTrackers">0</strong></div></article><article><div><span>Threats Blocked</span><strong id="actThreats">0</strong></div></article><article><div><span>Tracking Params Cleaned</span><strong id="actCleaned">0</strong></div></article></div>
+      <article class="card"><div class="card-head"><div><b>Protection activity</b><span>Last 7 days</span></div></div><div id="activityBars" class="bars large-bars"></div><div class="legend"><span><i class="green"></i>Ads</span><span><i class="amber"></i>Trackers</span><span><i class="red"></i>Threats</span></div></article>
+    </section>
+
+    <section id="section-license" class="view">
+      <div class="page-head"><div><h1>License</h1><p>Use your QuietShield customer key or administrator key. The licensing service address is internal and is not shown here.</p></div></div>
+      <article class="card license-card"><div class="license-state"><img src="../../assets/icon-48.png" alt=""><div><b id="licenseTitle">License not checked</b><span id="licenseDetail">Activate a key or start the 7-day trial.</span></div></div><label class="field">License or administrator key<input id="licenseKey" type="password" autocomplete="off" spellcheck="false" placeholder="QS-..."></label><div class="actions"><button id="activate">Activate key</button><button id="trial" class="outline">Start / restore 7-day trial</button><button id="refreshLicense" class="outline">Refresh</button></div><div id="licenseStatus" class="status">Ready.</div><div class="device-tools"><button id="loadDevices" class="outline">My licensed devices</button><div id="deviceList" class="device-list" hidden></div></div><p class="privacy-note">Administrator keys are never hard-coded into QuietShield Chrome. After a successful administrator activation, the administrator key itself is not persisted in the browser profile.</p></article>
+    </section>
+
+    <section id="section-settings" class="view">
+      <div class="page-head"><div><h1>Settings</h1><p>Privacy and local-data controls.</p></div></div>
+      <article class="card setting-list"><label><div><b>Network Inspector</b><span>Observe request domains in memory for the active tab.</span></div><input data-setting="networkInspector" type="checkbox"></label><label><div><b>HTTPS Upgrade</b><span>Upgrade HTTP top-level and frame navigations when Chrome can do so safely.</span></div><input data-setting="httpsUpgrade" type="checkbox"></label></article>
+      <article class="card"><h2>Privacy</h2><p class="privacy-note">QuietShield stores settings, aggregate counters, per-site rules, and license state locally. Network Inspector domain details stay in service-worker memory and disappear when Chrome ends that worker/session. The hidden Apps Script address is routing configuration, not a secret credential.</p></article>
+    </section>
+
+    <section id="section-about" class="view">
+      <div class="page-head"><div><h1>About QuietShield</h1><p>QuietShield Chrome 1.0.2 R3</p></div></div>
+      <article class="card"><div class="about-brand"><img src="../../assets/icon-128.png" alt=""><div><h2>QuietShield Chrome</h2><p>Local Manifest V3 browser protection for ads, trackers, popups, redirects, page annoyances and tracking parameters.</p></div></div><p class="privacy-note">QuietShield uses packaged extension logic only. The license server is used only for licensing operations; no remote JavaScript is executed by the extension.</p></article>
+    </section>
+  </main>
+</div>
 <script src="options.js"></script>
 </body>
 </html>

@@ -1,92 +1,36 @@
-# QuietShield Apps Script — Chrome integration
+# QuietShield shared license server: Chrome integration
 
-QuietShield Chrome reuses the existing QuietShield Apps Script, license registry, Payhip verification, trials, device slots, and RSA-signed receipts. Do **not** create a second key database and do **not** put any server secret in the extension.
+QuietShield Chrome must use the existing QuietShield Apps Script project, existing database and existing keys. Do not create another license server or spreadsheet.
 
-## Why the existing server needs one small change
+## Matching server source
 
-The current server validates `packageName` against only the Android `APP_PACKAGE` and `APP_PACKAGE + '.trial'`. Chrome therefore needs its own explicitly authorized identity rather than pretending to be Android.
+Deploy `QuietShield_License_Server_v1.2.6_Code372_Chrome_R3.gs`, supplied separately with the R3 package.
 
-Chrome R2 sends:
+Code372 is a cumulative update of the existing v1.2.5 Code371 server. It preserves Android, Google Play billing, family/admin functions, key registry, trial records and signed receipts. Its Chrome-specific changes are intentionally narrow:
 
-```text
-platform   = Chrome
-packageName = quietshield.chrome
-appVersion  = 1.0.1
-```
-
-It also sends the existing required `deviceHash` and `deviceName` fields.
-
-## Server property
-
-Add this Script Property to the **same** Apps Script project:
-
-```text
-CHROME_PACKAGE=quietshield.chrome
-```
-
-This value is an application identifier, not a secret.
-
-## Patch validatedDevice_
-
-In the current server, replace the Android-only authorized-package block inside `validatedDevice_(request)` with this cross-platform block:
-
-```javascript
-const props = PropertiesService.getScriptProperties();
-const premiumPackage = requiredProperty_('APP_PACKAGE');
-const chromePackage = String(
-  props.getProperty('CHROME_PACKAGE') || ''
-).trim();
-
-const authorizedPackages = new Set([
-  premiumPackage,
-  premiumPackage + '.trial'
-]);
-
-if (chromePackage) {
-  authorizedPackages.add(chromePackage);
-}
-
-if (!authorizedPackages.has(packageName)) {
-  const error = new Error('Package is not authorized.');
-  error.qsPublicCode = 'PACKAGE_NOT_AUTHORIZED';
-  error.qsPublicMessage = 'This QuietShield client is not authorized for this license service.';
-  throw error;
-}
-```
-
-Keep the rest of `validatedDevice_` unchanged.
-
-## Configuration validation
-
-Add `CHROME_PACKAGE` to the required Script Properties list used by `validateQuietShieldConfiguration()` after the Chrome deployment is ready. This makes a missing Chrome identity fail visibly instead of silently disabling Chrome licensing.
-
-## Closed-test key note
-
-If the legacy closed-test key must also work in Chrome, update `assertClosedTestPackage_(device)` to accept either the Android premium package or `CHROME_PACKAGE`. Do not remove package validation entirely.
-
-## Receipt verification
-
-The existing server returns RSA-SHA256 receipts shaped as:
-
-```json
-{
-  "receipt": {
-    "algorithm": "SHA256withRSA",
-    "payload": "<base64url>",
-    "signature": "<base64url>"
-  }
-}
-```
-
-R2 validates the online HTTPS response, receipt format, and local `deviceHash` binding. Before Premium features rely on offline receipts, pin the existing QuietShield SPKI public verification key in the extension and verify the signature with WebCrypto. Never copy `RECEIPT_PRIVATE_KEY_B64`, Payhip secrets, admin tokens, or license peppers into Chrome.
+1. Adds the fixed client identity `quietshield.chrome`.
+2. Allows that identity in `validatedDevice_()`.
+3. Allows it for the legacy tester-package check if that license class is used.
+4. Keeps administrator device public-key registration intact.
+5. Adds a non-mutating `runChromePackageSelfTestCode372()` function.
 
 ## Deployment order
 
-1. Patch the same Apps Script project.
-2. Add `CHROME_PACKAGE=quietshield.chrome`.
-3. Run the server's configuration validation.
-4. Update the existing Web App deployment (do not create a separate license database).
-5. Confirm GET `/exec` reports the expected healthy server build.
-6. Load QuietShield Chrome unpacked and start a trial.
-7. Activate a real test license and confirm Chrome occupies one normal device slot.
-8. Confirm a fourth active device is rejected for a normal three-device license.
+1. Open the SAME Apps Script project currently serving QuietShield.
+2. Back up its existing Code.gs.
+3. Replace Code.gs with the supplied Code372 source and Save.
+4. Run `setupQuietShieldLicenseSystem()` once. This advances the server's schema-ready build marker without clearing existing records.
+5. Run `validateQuietShieldConfiguration()`.
+6. Run `runChromePackageSelfTestCode372()`; it must return `CODE372_CHROME_PACKAGE_SELF_TEST_PASS`.
+7. Deploy > Manage deployments > edit the EXISTING Web App deployment > create a new version > Deploy. Do not create a second web-app deployment.
+8. Reload QuietShield Chrome and test Trial, customer key, then your administrator key.
+
+## Administrator activation
+
+The existing server requires `adminPublicKey` when an administrator key is activated. R3 generates a 2048-bit RSA device keypair locally and sends only the public SPKI material. The administrator activation key is never bundled and is removed from Chrome storage after a successful admin activation.
+
+## Expected failures before deployment
+
+- `PACKAGE_NOT_AUTHORIZED`: the old server is still deployed.
+- `SERVER_SETUP_REQUIRED`: Code372 is saved/deployed but `setupQuietShieldLicenseSystem()` has not yet been run for the new build marker.
+- `ADMIN_DEVICE_KEY_REQUIRED`: an older Chrome client is being used; R3 supplies the required device public key.

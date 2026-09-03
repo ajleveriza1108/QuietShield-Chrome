@@ -1,14 +1,13 @@
 {
   "manifest_version": 3,
   "name": "QuietShield",
-  "version": "1.0.1",
-  "description": "QuietShield browser protection: ads, trackers, malicious requests, cosmetic cleanup, URL tracking cleanup, site controls, and network insights.",
+  "version": "1.0.2",
+  "description": "QuietShield blocks ads and trackers, cleans page annoyances, and gives per-site privacy controls.",
   "minimum_chrome_version": "120",
   "permissions": [
     "storage",
     "tabs",
     "activeTab",
-    "scripting",
     "declarativeNetRequest",
     "webRequest"
   ],
@@ -41,18 +40,26 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "js": ["src/content/page-guard.js"],
+      "run_at": "document_start",
+      "all_frames": false,
+      "world": "MAIN"
+    },
+    {
+      "matches": ["<all_urls>"],
       "js": ["src/content/content.js"],
       "run_at": "document_start",
-      "all_frames": false
+      "all_frames": false,
+      "world": "ISOLATED"
     }
   ],
   "declarative_net_request": {
     "rule_resources": [
-      {
-        "id": "qs_base",
-        "enabled": true,
-        "path": "src/rules/base-rules.json"
-      }
+      {"id":"qs_ads","enabled":true,"path":"src/rules/ads-rules.json"},
+      {"id":"qs_trackers","enabled":true,"path":"src/rules/tracker-rules.json"},
+      {"id":"qs_security","enabled":true,"path":"src/rules/security-rules.json"},
+      {"id":"qs_redirects","enabled":true,"path":"src/rules/redirect-rules.json"},
+      {"id":"qs_upgrade","enabled":false,"path":"src/rules/upgrade-rules.json"}
     ]
   },
   "content_security_policy": {

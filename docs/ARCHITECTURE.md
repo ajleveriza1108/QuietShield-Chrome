@@ -1,30 +1,24 @@
-# QuietShield Chrome Architecture
+# QuietShield Chrome R3 architecture
 
-## Security boundary
+## UI
+- `src/ui/popup.*`: active-site protection, master switch, live counters, site mode, Network Inspector.
+- `src/ui/options.*`: Home, Protection, Sites, Activity, License, Settings and About.
+- There are no placeholder Family or developer-endpoint pages in R3.
 
-All executable JavaScript is bundled with the extension. Remote services may provide licensing responses and configuration data only. Remote JavaScript is never fetched or evaluated.
+## Request protection
+- `qs_ads`: known advertising networks.
+- `qs_trackers`: analytics, profiling and cross-site tracking endpoints.
+- `qs_security`: packaged threat-test and browser cryptomining endpoints.
+- `qs_redirects`: known popunder/advertising redirect networks.
+- `qs_upgrade`: optional HTTP main/subframe upgrade; off by default.
 
-## Browser protection
+The background service worker maps persisted settings to enabled rulesets. Master Protection disables all QuietShield packaged rulesets and per-site dynamic rules. Trusted sites receive a high-priority `allowAllRequests` main-frame rule; Blocked sites receive a higher-priority block rule.
 
-- Static DNR rules: baseline ads, trackers, HTTPS upgrades.
-- Dynamic DNR rules: user site Trust/Block decisions.
-- Content script: cosmetic cleanup and tracking-parameter removal.
-- Read-only webRequest observer: Network Inspector metadata; it never blocks traffic.
+## Page protection
+`content.js` performs cosmetic cleanup, annoyance cleanup and tracking-parameter removal. `page-guard.js` runs in the page's MAIN world and intercepts non-user-initiated scripted popups and known redirector `window.open()` calls when the corresponding settings are enabled.
 
-## Privacy
-
-The service worker keeps per-tab Network Inspector state in memory. The browser does not persist a detailed URL history. Aggregate counters are stored locally.
+## Activity
+The service worker observes request metadata read-only through `webRequest`, categorizes known QuietShield domains, keeps current-tab domain details in memory, and stores aggregate counters/daily totals locally. It does not use `webRequestBlocking`.
 
 ## Licensing
-
-`licensing.js` is a transport adapter to the existing QuietShield Apps Script. Product entitlement decisions remain server-side. No server signing secret is stored in the extension.
-
-## Planned next layers
-
-1. Signed filter metadata and Last Known Good rollback.
-2. Strong and Family profiles.
-3. Threat intelligence and suspicious redirect interstitial.
-4. Element picker and user cosmetic rules.
-5. Broken Site Reporter / compatibility repair.
-6. Protected Window helpers.
-7. QuietShield Windows native messaging bridge.
+`licensing.js` contains the built-in public service route and the fixed platform/package identity. The UI cannot edit the route. Private server secrets never enter the extension. Administrator activation creates a local device-bound RSA keypair so the existing server can register the Chrome admin device.

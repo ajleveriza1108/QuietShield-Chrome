@@ -1,25 +1,22 @@
 # Changelog
 
-## 1.0.1 R2 - 2026-09-03
+## 1.0.2 R3
 
-Publisher reliability update.
+- Replaced the foundation UI with the approved QuietShield dark dashboard and compact popup.
+- Aligned Chrome icons with the established QuietShield green shield/check identity.
+- Removed all customer-facing Developer Configuration and license endpoint override controls.
+- Added independent MV3 rulesets for ads, trackers, threat/cryptomining domains, redirect networks, and optional HTTPS upgrades.
+- Added real persisted switches for every visible protection feature.
+- Added real Protected / Trusted / Blocked per-site modes.
+- Added popup lock, redirect guard, cosmetic cleanup, annoyance cleanup, and tracking-parameter cleanup.
+- Added local aggregate activity counters, seven-day dashboard charting, Privacy Score, and live Network Inspector.
+- Added customer license/trial/device-management UI to the new dashboard.
+- Added administrator activation support with a locally generated device RSA public key; administrator key is not persisted after successful activation.
+- Added Code372 same-server integration instructions for `quietshield.chrome`.
+- Strengthened the publisher with endpoint-UI, private-credential, package-contract, MV3, DNR and JavaScript validation gates.
 
-- Fixed the R1 MV3 remote-code scanner false-positive/stale-file failure.
-- Canonical install now backs up the previous source, preserves `.git`, and removes stale runtime/build files before copying the new package.
-- Remote executable-code validation now scans only the actual extension runtime under `src` and reports exact file/line details.
-- Added PowerShell 7 parser preflight in the BAT before any project mutation.
-- Added manifest-referenced local-file checks, CSP checks, DNR JSON parsing, and duplicate rule-ID validation.
-- Preserved the existing two-repository publication contract and PowerShell 7 requirement.
+## 1.0.1 R2
 
-## 1.0.0 R1 - 2026-09-03
-
-Initial QuietShield Chrome foundation.
-
-- Added MV3 service-worker architecture.
-- Added bundled declarative baseline filtering.
-- Added cosmetic cleanup and tracking-parameter cleanup.
-- Added Protected / Trusted / Blocked site modes.
-- Added privacy-first Network Inspector.
-- Added toolbar block-count badge integration.
-- Added shared QuietShield Apps Script licensing adapter.
-- Added PowerShell 7 two-repository publisher and release metadata generation.
+- Fixed the R1 publisher remote-script false positive.
+- Added clean canonical installation and stale-source removal while preserving `.git`.
+- Added PowerShell 7 parser preflight.

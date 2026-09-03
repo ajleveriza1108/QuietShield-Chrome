@@ -1,73 +1,47 @@
-# QuietShield Chrome
+# QuietShield Chrome 1.0.2 R3
 
-QuietShield Chrome is the browser-protection layer of the QuietShield ecosystem.
+QuietShield Chrome is a Manifest V3 privacy and ad-blocking extension that uses the same QuietShield product identity and shared licensing backend as the other QuietShield clients.
 
-## v1.0.1 R2 clean publisher fix
+## R3 goals
 
-- Manifest V3 extension
-- Declarative ad/tracker blocking baseline
-- HTTPS upgrade rule
-- Cosmetic ad/annoyance cleanup
-- URL tracking-parameter cleanup
-- Per-site Protected / Trusted / Blocked modes
-- Network Inspector with ephemeral per-tab domain observations
-- Chrome action block-count badge
-- Privacy-first aggregate counters
-- Same QuietShield Apps Script license service and customer keys
-- License refresh + customer device list/removal using the same server
-- Current server request contract: `deviceHash`, `deviceName`, `platform`, `packageName`, `appVersion`
-- Stable generated Chrome installation/device ID
-- 7-day trial + normal three-device license model remains server-side
-- PowerShell 7 clean build + two-repository publisher
-- PowerShell 7 parser gate before project mutation
-- Transactional canonical install with rollback backup and stale-file cleanup
-- Runtime-only MV3 remote-code scanner with exact file/line diagnostics
+- Real ad/tracker request blocking with packaged Declarative Net Request rules.
+- Real per-site Protected / Trusted / Blocked controls.
+- Real popup and redirect protection.
+- Cosmetic ad-space and common annoyance cleanup.
+- Tracking-parameter removal.
+- Local Network Inspector and aggregate activity statistics.
+- The approved dark QuietShield dashboard and compact extension popup.
+- License, trial, administrator activation and customer-device management through the existing QuietShield licensing service.
+- No customer-facing developer endpoint controls.
+- No administrator key, Payhip secret, receipt private key, or other private server credential in the extension.
 
-## Canonical Windows project
+## Protection architecture
 
-`D:\Windows Projects\QuietShield-Chrome`
+QuietShield uses separate packaged MV3 rulesets for ads, trackers, threats/cryptomining, redirect networks, and optional HTTP-to-HTTPS upgrades. Dashboard switches enable or disable the corresponding rulesets instead of changing only the appearance of the UI.
 
-Source repository: `https://github.com/ajleveriza1108/QuietShield-Chrome`
+The extension also uses a small page guard for non-user-initiated `window.open()` popups and known advertising redirectors. Cosmetic cleanup runs in an isolated content script.
 
-Release repository: `https://github.com/ajleveriza1108/QuietShield-Chrome-Release`
+## Privacy
 
-## First install / development test
-
-1. Extract this package.
-2. Run `START-PUBLISH-QUIETSHIELD-CHROME-R2.bat` if you want it installed to the canonical path and published to both repositories.
-3. Open `chrome://extensions`.
-4. Turn on **Developer mode**.
-5. Click **Load unpacked**.
-6. Select `D:\Windows Projects\QuietShield-Chrome`.
-7. Test normal browsing, site Trust/Block, Network Inspector, and URL cleanup.
+Network Inspector data is kept in memory for the current browser session. Aggregate counters and seven-day chart data are stored locally in Chrome storage. QuietShield does not upload browsing history to its licensing service.
 
 ## Licensing
 
-The extension intentionally contains no Payhip secret, RSA private key, admin token, customer database, or license pepper.
+The service address is internal application routing configuration and is not shown in the user interface. It is not treated as a secret. Private signing keys and licensing secrets remain server-side.
 
-Chrome R2 sends the existing Apps Script:
+Administrator activation generates a device-bound RSA keypair in the Chrome profile and submits only its public key to the server. The full administrator activation key is never hard-coded and is not retained after successful administrator activation.
 
-- `deviceHash`: stable random installation ID
-- `deviceName`: `QuietShield Chrome`
-- `platform`: `Chrome`
-- `packageName`: `quietshield.chrome`
-- `appVersion`: extension version
-- `licenseKey`: activation, refresh, list-device, and remove-device flows only; kept local and excluded from backup/logging
+Before Chrome activation can pass, deploy the matching same-server Code372 integration described in `docs/APPS-SCRIPT-CHROME-INTEGRATION.md`.
 
-The current server is Android-package restricted, so deploy the small cross-platform allowlist patch in `docs/APPS-SCRIPT-CHROME-INTEGRATION.md` before expecting Chrome trial/license calls to pass.
+## Windows publisher
 
-The public Apps Script endpoint already used by QuietShield is built into R2. Settings provides a local override for test deployments.
+Run normally, not as Administrator:
 
-R2 does **not** yet use a stored signed receipt as an offline Premium authority. It accepts online server success, decodes the signed receipt, and verifies its `deviceHash` binding. RSA public-key pinning/WebCrypto verification is the next security gate before offline Premium enforcement.
+`START-PUBLISH-QUIETSHIELD-CHROME-R3.bat`
 
-## Privacy model
+Requirements:
+- PowerShell 7
+- Git for Windows
+- Git identity and GitHub authentication already configured
 
-Network Inspector observations are held in service-worker memory and disappear with the tab/service-worker lifecycle. Detailed browsing history is off. Aggregate protection counters may be stored locally.
-
-## Publisher
-
-Run:
-
-`START-PUBLISH-QUIETSHIELD-CHROME-R2.bat`
-
-The PowerShell 7 publisher validates the package, creates the ZIP and SHA-256 metadata, pushes the source repository, then updates the release repository.
+The publisher installs cleanly to `D:\Windows Projects\QuietShield-Chrome`, preserves `.git`, validates the MV3 package, builds the release ZIP, and pushes both QuietShield Chrome repositories.

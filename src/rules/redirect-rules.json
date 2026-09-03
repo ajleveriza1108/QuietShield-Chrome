@@ -1,0 +1,11 @@
+[
+  {
+    "id": 4001,
+    "priority": 20,
+    "action": {"type":"block"},
+    "condition": {
+      "requestDomains": ["popads.net","popcash.net","propellerads.com","onclickalgo.com","onclickgenius.com","onclickmax.com","clickadu.com","adsterra.com","exoclick.com","trafficjunky.com","juicyads.com","hilltopads.net","richads.com","pushground.com"],
+      "resourceTypes": ["main_frame","sub_frame","script","xmlhttprequest","other"]
+    }
+  }
+]

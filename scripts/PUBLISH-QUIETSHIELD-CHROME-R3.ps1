@@ -9,9 +9,9 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$Version = '1.0.1'
-$Revision = 'R2'
-$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R2.bat'
+$Version = '1.0.2'
+$Revision = 'R3'
+$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R3.bat'
 $PackageName = "QuietShield-Chrome-$Version-$Revision.zip"
 
 function Write-Step([string]$Text) {
@@ -302,6 +302,36 @@ Write-Host '[PASS] Manifest V3 validation passed.' -ForegroundColor Green
 Write-Host '[PASS] Runtime remote-code scan passed.' -ForegroundColor Green
 Write-Host '[PASS] DNR ruleset validation passed.' -ForegroundColor Green
 
+# R3 release contracts: no customer-facing developer endpoint override, no
+# hardcoded administrator credential, and the built-in service endpoint must
+# live only in the background licensing client.
+$runtimeTextFiles = @($jsFiles + $htmlFiles)
+Assert-TextPatternAbsent `
+    -Files $runtimeTextFiles `
+    -Pattern '(?i)Developer Configuration|QS_SET_LICENSE_ENDPOINT|endpoint override|Use built-in endpoint' `
+    -FailureLabel 'Customer-facing developer endpoint configuration was found in R3.'
+
+Assert-TextPatternAbsent `
+    -Files $runtimeTextFiles `
+    -Pattern 'QS-ADMIN-[A-Z0-9-]{20,100}|BEGIN (RSA )?PRIVATE KEY|PAYHIP_PRODUCT_SECRET|RECEIPT_PRIVATE_KEY_B64' `
+    -FailureLabel 'Private credential or signing material was found in the Chrome runtime.'
+
+$endpointHits = @(
+    Get-ChildItem -LiteralPath $srcRoot -Recurse -File |
+        Select-String -Pattern 'script\.google\.com/macros/s/' -ErrorAction SilentlyContinue
+)
+if ($endpointHits.Count -ne 1 -or $endpointHits[0].Path -notlike '*\src\background\licensing.js') {
+    Fail 'The built-in Apps Script route must appear exactly once and only in src\background\licensing.js.'
+}
+
+$packageBat = @(Get-ChildItem -LiteralPath $CanonicalRoot -File -Filter '*.bat')
+$packagePs1 = @(Get-ChildItem -LiteralPath (Join-Path $CanonicalRoot 'scripts') -File -Filter '*.ps1')
+if ($packageBat.Count -ne 1 -or $packagePs1.Count -ne 1) {
+    Fail 'R3 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
+}
+
+Write-Host '[PASS] R3 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
+
 Write-Step 'Git source repository'
 
 $gitFolder = Join-Path $CanonicalRoot '.git'
@@ -331,7 +361,7 @@ Invoke-GitChecked -Arguments @('add', '-A') -FailureMessage 'git add failed for 
 $changes = (& $script:GitExe status --porcelain | Out-String).Trim()
 if ($changes) {
     Invoke-GitChecked `
-        -Arguments @('commit', '-m', "QuietShield Chrome $Version $Revision clean publisher fix") `
+        -Arguments @('commit', '-m', "QuietShield Chrome $Version $Revision fully functional dashboard and protection engine") `
         -FailureMessage 'Source repository commit failed.'
 } else {
     Write-Host '[INFO] Source repository has no uncommitted changes.' -ForegroundColor DarkGray
