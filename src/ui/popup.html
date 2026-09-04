@@ -9,47 +9,59 @@
 <body>
 <main class="popup-shell">
   <header class="brand-row">
-    <div class="brand"><img src="../../assets/icon-48.png" alt=""><span>QuietShield</span></div>
-    <button id="settings" class="icon-btn" title="Settings" aria-label="Settings">⚙</button>
+    <div class="brand"><span class="brand-mark"><img src="../../assets/icon-48.png" alt=""></span><div><b>QuietShield</b><span>Chrome protection</span></div></div>
+    <div class="brand-actions"><span id="liveState" class="live"><i></i>Active</span><button id="settings" class="icon-btn" title="Settings" aria-label="Settings">⚙</button></div>
   </header>
 
-  <section class="hero">
-    <img src="../../assets/icon-128.png" alt="QuietShield" class="hero-shield">
-    <div><h1 id="statusText">Protected</h1><p id="statusSub">QuietShield is protecting you</p></div>
+  <section id="hero" class="hero panel">
+    <div class="hero-icon"><img src="../../assets/icon-128.png" alt="QuietShield"></div>
+    <div class="hero-copy"><h1 id="statusText">Protected</h1><p id="statusSub">Blocking ads, trackers and threats</p></div>
+    <div class="hero-score"><strong id="actionTotal">0</strong><span>actions</span></div>
   </section>
 
-  <section class="stats">
-    <div><span>Ads Blocked</span><strong id="adsBlocked">0</strong></div>
-    <div><span>Trackers Blocked</span><strong id="trackersBlocked">0</strong></div>
-    <div><span>Threats Blocked</span><strong id="threatsBlocked">0</strong></div>
+  <section class="stats panel">
+    <div><span>Ads</span><strong id="adsBlocked">0</strong></div>
+    <div><span>Trackers</span><strong id="trackersBlocked">0</strong></div>
+    <div><span>Threats</span><strong id="threatsBlocked">0</strong></div>
+    <div><span>Redirects</span><strong id="redirectsBlocked">0</strong></div>
   </section>
 
   <section class="panel master-row">
-    <div><b>Master Protection</b><small id="actionCount">0 protection actions on this page</small></div>
+    <div class="master-copy"><span class="mini-shield">◆</span><div><b>Master Protection</b><small id="actionCount">Protection is active on this page</small></div></div>
     <label class="switch"><input id="enabled" type="checkbox"><span></span></label>
   </section>
 
+  <section class="quick-locks" aria-label="Protection layers">
+    <button class="lock-tile" data-setting="adLock"><span class="lock-icon">◈</span><b>Ad Lock</b><i></i></button>
+    <button class="lock-tile" data-setting="trackerLock"><span class="lock-icon">◎</span><b>Tracker</b><i></i></button>
+    <button class="lock-tile" data-setting="threatLock"><span class="lock-icon">△</span><b>Threat</b><i></i></button>
+    <button class="lock-tile" data-setting="popupLock"><span class="lock-icon">▣</span><b>Popup</b><i></i></button>
+    <button class="lock-tile" data-setting="redirectLock"><span class="lock-icon">↪</span><b>Redirect</b><i></i></button>
+  </section>
+
   <section class="site-section">
-    <div class="section-label">Current Site</div>
+    <div class="section-label"><span>Current Site</span><span id="connection" class="connection">Web page</span></div>
     <div class="panel site-card">
-      <div class="site-head"><div><span class="globe">◎</span><b id="site">Chrome page</b></div><span id="siteBadge" class="badge">Protected</span></div>
-      <div id="connection" class="connection">Site controls are available on web pages.</div>
+      <div class="site-head"><div><span class="globe">◎</span><b id="site">No web page selected</b></div><span id="siteBadge" class="badge">Protected</span></div>
       <div class="site-actions">
-        <button data-mode="protected" class="mode"><span>◈</span>Protected</button>
-        <button data-mode="trusted" class="mode"><span>◇</span>Trust Site</button>
-        <button data-mode="blocked" class="mode danger"><span>⊘</span>Block Site</button>
+        <button data-mode="protected" class="mode">Protected</button>
+        <button data-mode="trusted" class="mode">Trust Site</button>
+        <button data-mode="blocked" class="mode danger">Block Site</button>
       </div>
     </div>
   </section>
 
   <section class="panel inspector">
-    <div class="panel-head"><b>Network Inspector</b><span>Live tab</span></div>
-    <div class="inspector-stats"><div><span>Requests</span><b id="requests">0</b></div><div><span>Actions</span><b id="blocked">0</b></div><div><span>Domains</span><b id="domainCount">0</b></div></div>
+    <div class="panel-head"><div><b>Network Inspector</b><span><i class="live-dot"></i>Live</span></div><button id="activity" class="text-btn">Activity ›</button></div>
+    <div class="inspector-stats"><div><span>Requests</span><b id="requests">0</b></div><div><span>Blocked</span><b id="blocked">0</b></div><div><span>Domains</span><b id="domainCount">0</b></div></div>
     <div id="domains" class="domains"></div>
   </section>
 
-  <button id="pause" class="wide-action"><span>Ⅱ</span><span id="pauseLabel">Pause Protection</span><span>›</span></button>
-  <footer><button id="dashboard">▦&nbsp; Dashboard</button><button id="help">?&nbsp; Help</button></footer>
+  <footer>
+    <button id="dashboard">▦ <span>Dashboard</span></button>
+    <div class="version">v1.0.4 R5</div>
+    <button id="pause"><span id="pauseIcon">Ⅱ</span> <span id="pauseLabel">Pause</span></button>
+  </footer>
 </main>
 <script src="popup.js"></script>
 </body>

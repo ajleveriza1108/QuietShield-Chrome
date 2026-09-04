@@ -1,62 +1,41 @@
-# QuietShield Chrome 1.0.3 R4 acceptance plan
+# QuietShield Chrome 1.0.4 R5 acceptance plan
 
-R4 is not considered complete merely because the GUI loads.
+R5 is not considered complete merely because the dashboard opens.
 
-## Gate A - installation
-- Load `D:\Windows Projects\QuietShield-Chrome` unpacked in Chrome 120+.
-- No manifest, DNR, service-worker or content-script errors.
-- QuietShield shield icon appears in Chrome.
+## Chrome load
 
-## Gate B - master protection
-- Master ON: ads/tracker/security/redirect rulesets match their individual switches.
-- Master OFF: all QuietShield packaged rulesets and dynamic site rules are disabled.
-- Re-enable: persisted settings and site rules are restored.
+1. Run `START-PUBLISH-QUIETSHIELD-CHROME-R5.bat` normally, not as Administrator.
+2. Select `D:\Windows Projects\QuietShield-Chrome\LOAD-UNPACKED` in `chrome://extensions`.
+3. Confirm there are no Manifest/DNR/service-worker errors.
 
-## Gate C - real ad blocking
-- A page requesting a known test ad-network hostname is blocked and increments Chrome's action badge.
-- Disabling Ad Lock disables the ad ruleset immediately without changing unrelated Tracker Lock.
-- Cosmetic ad slots disappear when cosmetic filtering is enabled.
+## CanYouBlockIt
 
-## Gate D - tracker/threat/redirect layers
-- Tracker Lock blocks a known packaged tracker domain.
-- Threat Lock blocks a packaged safe threat-test hostname.
-- Redirect Lock blocks a packaged redirect-network request.
-- Popup Lock prevents non-user-initiated scripted `window.open()` and still permits a user-click popup.
+1. Disable other ad blockers for the test so QuietShield is isolated.
+2. Visit the CanYouBlockIt Adblock Detector. QuietShield should be detected because the `.ad-widget` detector bait is synchronously hidden.
+3. Visit Simple Test `/testing/`; the self-hosted interstitial/ad elements should be hidden.
+4. Visit eXtreme Test; third-party banner/pop-under/redirect resources should be blocked where they match packaged rules.
+5. Click on the eXtreme/Pop-Under test page. Popup Lock should suppress the advertising pop-under.
+6. Re-open QuietShield while the dashboard tab is active; the popup should show the most recently used normal website, not the extension ID.
 
-## Gate E - site controls
-- Protected = normal QuietShield filtering.
-- Trusted = QuietShield request filtering and page cleanup bypassed for the site.
-- Blocked = main frame cannot load.
-- Rules survive Chrome restart and can be edited/removed in Sites.
+## Switch behavior
 
-## Gate F - URL Cleaner and annoyances
-- `utm_*`, `fbclid`, `gclid`, `msclkid` and listed tracking parameters are removed without a network navigation.
-- Turning URL Cleaner off stops the behavior.
-- Newsletter/push/floating-ad overlays are cosmetically hidden only when Annoyance Lock is enabled.
+- Ad Lock OFF then reload: ad filtering should reduce/stop while other layers remain active.
+- Tracker Lock OFF: tracker ruleset disables independently.
+- Threat Lock OFF: security ruleset disables independently.
+- Popup Lock OFF: `window.open` guard no longer suppresses its popup test behavior.
+- Redirect Lock OFF: redirect ruleset disables independently.
+- Master Protection OFF: packaged rulesets and page protection pause.
+- Trusted site: site bypass takes precedence over ordinary protection.
+- Blocked site: top-level navigation is blocked.
 
-## Gate G - Network Inspector and activity
-- Current-tab request count/domains update while browsing.
-- Network Inspector OFF clears in-memory inspection data.
-- Aggregate counters and seven-day chart survive restart.
-- Clear Activity resets activity only, preserving settings/site modes/license.
+## Counters
 
-## Gate H - licensing after Code372 deployment
-- 7-day Trial starts/restores through the same QuietShield server.
-- Customer key activates and can list/remove devices where supported.
-- Fourth active device remains rejected for a standard 3-device license.
-- Administrator key activation sends a generated public device key and succeeds within current admin-seat policy.
-- Administrator key is absent from Chrome local storage after successful activation.
-- The Apps Script deployment address is absent from every customer-facing screen.
+- Network blocks should increase page action/badge counts.
+- Cosmetic ad hides should increase Ads Blocked and cosmetic totals.
+- URL tracking cleanup should increase cleanup totals.
+- Popup suppression should increase popup totals.
+- Network Inspector should list request domains only while enabled and only in service-worker memory.
 
-## Gate I - privacy/security
-- No Payhip secret, private receipt key, admin activation key, service-account material or signing password is bundled.
-- No remote executable JavaScript.
-- No `eval` / `new Function`.
-- Network activity to the licensing server occurs only for explicit license operations/refreshes, not browsing telemetry.
+## Licensing
 
-## Gate J - publisher
-- Run normally under PowerShell 7.
-- PowerShell parser gate passes before canonical files are changed.
-- Canonical clean install backup succeeds.
-- Source and release repositories both push successfully.
-- Release ZIP SHA-256 is printed and stored in the release repository.
+Live Chrome activation requires the existing QuietShield Apps Script deployment to be updated to Code372 so `quietshield.chrome` is authorized. Test customer key, trial, administrator key, refresh, list devices and remove device after server deployment.

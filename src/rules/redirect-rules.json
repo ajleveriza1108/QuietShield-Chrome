@@ -1,11 +1,231 @@
 [
   {
     "id": 4001,
-    "priority": 20,
-    "action": {"type":"block"},
+    "priority": 40,
+    "action": {
+      "type": "block"
+    },
     "condition": {
-      "requestDomains": ["popads.net","popcash.net","propellerads.com","onclickalgo.com","onclickgenius.com","onclickmax.com","clickadu.com","adsterra.com","exoclick.com","trafficjunky.com","juicyads.com","hilltopads.net","richads.com","pushground.com"],
-      "resourceTypes": ["main_frame","sub_frame","script","xmlhttprequest","other"]
+      "requestDomains": [
+        "adsterra.com",
+        "clickadu.com",
+        "clickadilla.com",
+        "clickaine.com",
+        "clickgate07.biz",
+        "clickgate09.biz",
+        "exoclick.com",
+        "hilltopads.net",
+        "juicyads.com",
+        "maxonclick.com",
+        "megapopads.com",
+        "onclickalgo.com",
+        "onclickgenius.com",
+        "onclickmax.com",
+        "onclickprediction.com",
+        "offpageads.com",
+        "plsdrct1.me",
+        "plsdrct2.me",
+        "popads.net",
+        "popcash.net",
+        "popcashjs.b-cdn.net",
+        "poprush.net",
+        "popup-traffic.com",
+        "popvertising.com",
+        "poweradcash.net",
+        "propellerads.com",
+        "pushground.com",
+        "richads.com",
+        "smartclick.net",
+        "superfastcdn.com",
+        "trafficjunky.com"
+      ],
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 4010,
+    "priority": 25,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/afu.php",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 4011,
+    "priority": 25,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/apu.php",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 4012,
+    "priority": 25,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/smartpop/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 4013,
+    "priority": 25,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/popunder",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 4014,
+    "priority": 25,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/popup.php",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 4015,
+    "priority": 25,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/exitpop",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 4016,
+    "priority": 25,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/exitpopup",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 4017,
+    "priority": 25,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/redirect?feed=",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 4018,
+    "priority": 25,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/direct?",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 4019,
+    "priority": 25,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/click?pid=",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
     }
   }
 ]

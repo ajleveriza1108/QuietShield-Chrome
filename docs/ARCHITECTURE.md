@@ -1,9 +1,9 @@
-# QuietShield Chrome R4 architecture
+# QuietShield Chrome R5 architecture
 
 ## UI
 - `src/ui/popup.*`: active-site protection, master switch, live counters, site mode, Network Inspector.
 - `src/ui/options.*`: Home, Protection, Sites, Activity, License, Settings and About.
-- There are no placeholder Family or developer-endpoint pages in R4.
+- There are no placeholder Family or developer-endpoint pages in R5.
 
 ## Request protection
 - `qs_ads`: known advertising networks.

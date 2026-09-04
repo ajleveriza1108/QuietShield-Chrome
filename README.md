@@ -1,50 +1,57 @@
-# QuietShield Chrome 1.0.3 R4
+# QuietShield Chrome 1.0.4 R5
 
-QuietShield Chrome is a Manifest V3 privacy and ad-blocking extension that uses the same QuietShield product identity and shared licensing backend as the other QuietShield clients.
+QuietShield Chrome is a Manifest V3 browser-protection extension using the same QuietShield identity and shared licensing backend as the other QuietShield clients.
 
-## R4 goals
+## What changed in R5
 
-R4 is the Chrome compatibility correction for the R3 functional dashboard. It removes the unsupported DNR `worker` ResourceType that Chrome rejects and adds a build-time schema gate so the same error cannot be published again.
+R5 is a functional blocker upgrade, not only a GUI revision. The earlier starter rules were too narrow for dedicated adblock test pages and the popup could display zeros even when page-level protection had acted. R5 addresses both problems.
 
-
-- Real ad/tracker request blocking with packaged Declarative Net Request rules.
-- Real per-site Protected / Trusted / Blocked controls.
-- Real popup and redirect protection.
-- Cosmetic ad-space and common annoyance cleanup.
-- Tracking-parameter removal.
-- Local Network Inspector and aggregate activity statistics.
-- The approved dark QuietShield dashboard and compact extension popup.
-- License, trial, administrator activation and customer-device management through the existing QuietShield licensing service.
-- No customer-facing developer endpoint controls.
-- No administrator key, Payhip secret, receipt private key, or other private server credential in the extension.
+- Broader packaged ad-network and tracker-domain coverage.
+- Common third-party ad-path filtering for ad servers, ad scripts, prebid/VAST resources and WordPress ad plugins.
+- CanYouBlockIt same-origin test-ad filtering while keeping its test pages navigable.
+- Immediate `document_start` cosmetic filtering for high-confidence ad elements such as `.ad-widget`.
+- Interstitial/ad-overlay cleanup and stronger pop-under suppression.
+- Real popup quick switches for Ad, Tracker, Threat, Popup and Redirect protection.
+- Correct fallback to the latest normal web tab when the popup is opened while the QuietShield dashboard is active.
+- Improved per-page counters for network blocks, cosmetic ad hides, popups and URL cleanups.
+- Refined dashboard and popup visuals with refreshed QuietShield toolbar icons.
+- Hidden licensing endpoint remains internal; administrator credentials remain outside the package.
 
 ## Protection architecture
 
-QuietShield uses separate packaged MV3 rulesets for ads, trackers, threats/cryptomining, redirect networks, and optional HTTP-to-HTTPS upgrades. Dashboard switches enable or disable the corresponding rulesets instead of changing only the appearance of the UI.
+QuietShield uses five packaged MV3 rulesets: ads, trackers, threats/mining, redirect networks and optional HTTPS upgrades. The visible protection switches enable or disable real filtering behavior.
 
-The extension also uses a small page guard for non-user-initiated `window.open()` popups and known advertising redirectors. Cosmetic cleanup runs in an isolated content script.
+Page-level protection includes cosmetic filtering, URL tracking cleanup, popup/pop-under guards and annoyance cleanup. Trusted sites bypass QuietShield page protection after the stored site policy loads.
+
+## CanYouBlockIt behavior
+
+CanYouBlockIt deliberately uses both third-party and self-hosted advertisements. R5 adds browser-level blocking plus page-level cosmetic rules for its detector bait and interstitial test elements. QuietShield does not expose a unique webpage-visible "QuietShield installed" marker; the test should detect it as an ad blocker because ad elements are actually blocked/hidden.
 
 ## Privacy
 
-Network Inspector data is kept in memory for the current browser session. Aggregate counters and seven-day chart data are stored locally in Chrome storage. QuietShield does not upload browsing history to its licensing service.
+Network Inspector details remain in service-worker memory. Aggregate protection counters and site policies are stored locally. QuietShield does not upload browsing history to the licensing service.
 
 ## Licensing
 
-The service address is internal application routing configuration and is not shown in the user interface. It is not treated as a secret. Private signing keys and licensing secrets remain server-side.
+The service address is internal routing configuration and is not shown in the UI. Administrator keys are never hard-coded. Administrator activation uses a device-bound RSA keypair and does not retain the administrator activation key after successful activation.
 
-Administrator activation generates a device-bound RSA keypair in the Chrome profile and submits only its public key to the server. The full administrator activation key is never hard-coded and is not retained after successful administrator activation.
+Deploy the matching existing-server Code372 Chrome authorization before testing live Chrome licensing.
 
-Before Chrome activation can pass, deploy the matching same-server Code372 integration described in `docs/APPS-SCRIPT-CHROME-INTEGRATION.md`.
+## Load unpacked
+
+The publisher automatically recreates:
+
+`D:\Windows Projects\QuietShield-Chrome\LOAD-UNPACKED`
+
+Select that exact folder in `chrome://extensions` -> Developer mode -> Load unpacked.
 
 ## Windows publisher
 
 Run normally, not as Administrator:
 
-`START-PUBLISH-QUIETSHIELD-CHROME-R4.bat`
+`START-PUBLISH-QUIETSHIELD-CHROME-R5.bat`
 
 Requirements:
 - PowerShell 7
 - Git for Windows
-- Git identity and GitHub authentication already configured
-
-The publisher installs cleanly to `D:\Windows Projects\QuietShield-Chrome`, preserves `.git`, validates the MV3 package, creates `D:\Windows Projects\QuietShield-Chrome\LOAD-UNPACKED` containing only `manifest.json`, `assets`, and `src`, builds the release ZIP, and pushes both QuietShield Chrome repositories. Select that `LOAD-UNPACKED` folder directly in `chrome://extensions` -> Developer mode -> Load unpacked.
+- Existing GitHub authentication

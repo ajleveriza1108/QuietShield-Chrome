@@ -9,7 +9,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="side-brand"><img src="../../assets/icon-128.png" alt=""><div><b>QuietShield</b><span>Chrome</span></div></div>
+    <div class="side-brand"><span class="side-logo"><img src="../../assets/icon-128.png" alt=""></span><div><b>QuietShield</b><span>Chrome Protection</span></div></div>
     <nav>
       <button data-section="home" class="nav active"><span>⌂</span>Home</button>
       <button data-section="protection" class="nav"><span>◈</span>Protection</button>
@@ -19,12 +19,13 @@
       <button data-section="settings" class="nav"><span>⚙</span>Settings</button>
     </nav>
     <div class="side-status"><div class="round-shield"><img src="../../assets/icon-48.png" alt=""></div><div><span>Protection</span><b id="sideProtection">ON</b></div><p id="sideProtectionText">QuietShield is actively protecting you.</p></div>
-    <div class="side-footer">v1.0.3 R4 <span>•</span> <button data-section="about" class="link-nav">About</button></div>
+    <div class="side-footer">v1.0.4 R5 <span>•</span> <button data-section="about" class="link-nav">About</button></div>
   </aside>
 
   <main class="content">
     <section id="section-home" class="view active">
-      <div class="page-head"><div><h1>Dashboard</h1><p>Your privacy, under your control.</p></div><div class="updated">Local protection status <span class="dot"></span></div></div>
+      <div class="page-head"><div><h1>Dashboard</h1><p>Browser protection that acts before ads and trackers load.</p></div><div class="updated"><span class="dot"></span> Protection engine active</div></div>
+      <div class="engine-ribbon"><div><span>Rulesets</span><b id="engineRulesets">0 / 5 active</b></div><div><span>Default site mode</span><b>Protected</b></div><div><span>Filtering</span><b id="engineFiltering">Network + page</b></div><div><span>Storage</span><b>Local only</b></div></div>
       <div class="summary-grid">
         <article><div class="metric-icon">◈</div><div><span>Ads Blocked</span><strong id="sumAds">0</strong><small>Local protection hits</small></div></article>
         <article><div class="metric-icon">◎</div><div><span>Trackers Blocked</span><strong id="sumTrackers">0</strong><small>Local protection hits</small></div></article>
@@ -36,7 +37,7 @@
 
       <div class="lower-grid">
         <article class="card activity-card"><div class="card-head"><div><b>Activity</b><span>Last 7 days</span></div><button data-section="activity" class="link-nav">View full report</button></div><div id="homeBars" class="bars"></div><div class="legend"><span><i class="green"></i>Ads</span><span><i class="amber"></i>Trackers</span><span><i class="red"></i>Threats</span></div></article>
-        <article class="card score-card"><div class="card-head"><b>Your Privacy Score</b></div><div id="privacyGauge" class="gauge"><strong id="privacyScore">0</strong></div><b id="privacyLabel" class="score-label">Protection off</b><p id="privacyText">Turn on QuietShield protection to improve your score.</p></article>
+        <article class="card score-card"><div class="card-head"><b>Protection Coverage</b></div><div id="privacyGauge" class="gauge"><strong id="privacyScore">0</strong></div><b id="privacyLabel" class="score-label">Protection off</b><p id="privacyText">Turn on QuietShield protection to improve your score.</p></article>
       </div>
 
       <article class="card site-preview"><div class="card-head"><div><b>Per-site Controls</b><span>Customize protection for specific sites.</span></div><button data-section="sites" class="link-nav">Manage Sites ›</button></div><div id="sitePreview" class="site-preview-list"></div></article>
@@ -72,7 +73,7 @@
     </section>
 
     <section id="section-about" class="view">
-      <div class="page-head"><div><h1>About QuietShield</h1><p>QuietShield Chrome 1.0.3 R4</p></div></div>
+      <div class="page-head"><div><h1>About QuietShield</h1><p>QuietShield Chrome 1.0.4 R5</p></div></div>
       <article class="card"><div class="about-brand"><img src="../../assets/icon-128.png" alt=""><div><h2>QuietShield Chrome</h2><p>Local Manifest V3 browser protection for ads, trackers, popups, redirects, page annoyances and tracking parameters.</p></div></div><p class="privacy-note">QuietShield uses packaged extension logic only. The license server is used only for licensing operations; no remote JavaScript is executed by the extension.</p></article>
     </section>
   </main>

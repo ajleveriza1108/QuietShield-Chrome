@@ -3,7 +3,7 @@ setlocal
 cd /d "%~dp0"
 
 echo ============================================================
-echo QuietShield Chrome 1.0.3 R4 - CLEAN BUILD + TWO-REPO PUBLISHER
+echo QuietShield Chrome 1.0.4 R5 - CLEAN BUILD + TWO-REPO PUBLISHER
 echo Run normally - DO NOT Run as Administrator.
 echo Requires PowerShell 7.
 echo ============================================================
@@ -17,7 +17,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-set "QS_PS1=%~dp0scripts\PUBLISH-QUIETSHIELD-CHROME-R4.ps1"
+set "QS_PS1=%~dp0scripts\PUBLISH-QUIETSHIELD-CHROME-R5.ps1"
 
 echo [PRE-FLIGHT] Parsing the complete PowerShell 7 publisher...
 pwsh.exe -NoLogo -NoProfile -Command "$tokens=$null; $errors=$null; [void][System.Management.Automation.Language.Parser]::ParseFile($env:QS_PS1,[ref]$tokens,[ref]$errors); if($errors.Count -gt 0){ foreach($err in $errors){ Write-Host ('[PARSER] ' + $err.Message + ' at line ' + $err.Extent.StartLineNumber) -ForegroundColor Red }; exit 1 }; Write-Host '[PASS] PowerShell 7 parser preflight passed.' -ForegroundColor Green"

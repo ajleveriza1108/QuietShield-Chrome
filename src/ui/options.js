@@ -5,10 +5,10 @@ const FEATURES = [
   {key:'adLock',name:'Ad Lock',icon:'◈',desc:'Blocks requests to known advertising networks before they load.',counter:'adsBlocked',unit:'blocked'},
   {key:'trackerLock',name:'Tracker Lock',icon:'◎',desc:'Blocks analytics, profiling and cross-site tracking endpoints.',counter:'trackersBlocked',unit:'blocked'},
   {key:'threatLock',name:'Threat Lock',icon:'△',desc:'Blocks packaged threat-test and browser cryptomining endpoints.',counter:'threatBlocked',unit:'blocked'},
-  {key:'popupLock',name:'Popup Lock',icon:'▣',desc:'Suppresses script popups that are not triggered by an active user gesture.',counter:null,unit:'active'},
+  {key:'popupLock',name:'Popup Lock',icon:'▣',desc:'Blocks unsolicited script popups and pop-under behavior, including aggressive ad-test pages.',counter:'popupsBlocked',unit:'blocked'},
   {key:'redirectLock',name:'Redirect Lock',icon:'↪',desc:'Blocks known popunder and advertising redirect networks.',counter:'redirectBlocked',unit:'blocked'},
   {key:'trackingParamCleanup',name:'URL Cleaner',icon:'⌁',desc:'Removes common campaign and click-tracking parameters from page URLs.',counter:'trackingParamsCleaned',unit:'cleaned'},
-  {key:'annoyanceLock',name:'Annoyance Lock',icon:'▤',desc:'Hides common newsletter, push-notification and floating-ad overlays.',counter:'cosmeticHidden',unit:'hidden'},
+  {key:'annoyanceLock',name:'Annoyance Lock',icon:'▤',desc:'Hides common newsletter, push-notification, interstitial and floating-ad overlays.',counter:'annoyanceHidden',unit:'hidden'},
   {key:'networkInspector',name:'Network Inspector',icon:'⌁',desc:'Shows live request-domain insights for the active tab without keeping detailed history.',counter:null,unit:'live'}
 ];
 
@@ -51,14 +51,17 @@ function privacyScore() {
 }
 
 function renderHome() {
+  const activeRules = Array.isArray(appState?.enabledRulesets) ? appState.enabledRulesets.length : 0;
+  if ($('engineRulesets')) $('engineRulesets').textContent = `${activeRules} / 5 active`;
+  if ($('engineFiltering')) $('engineFiltering').textContent = settings().enabled === false ? 'Paused' : 'Network + page';
   $('sumAds').textContent=formatNumber(counters().adsBlocked);
   $('sumTrackers').textContent=formatNumber(counters().trackersBlocked);
   $('sumThreats').textContent=formatNumber(counters().threatBlocked);
-  $('sumCleanups').textContent=formatNumber(Number(counters().trackingParamsCleaned||0)+Number(counters().cosmeticHidden||0));
+  $('sumCleanups').textContent=formatNumber(Number(counters().trackingParamsCleaned||0)+Number(counters().cosmeticHidden||0)+Number(counters().popupsBlocked||0));
   renderFeatureGrid('homeFeatureGrid'); renderBars('homeBars');
   const score=privacyScore(); $('privacyScore').textContent=score; $('privacyGauge').style.setProperty('--score-deg',`${score*3.6}deg`);
   $('privacyLabel').textContent=score>=90?'Excellent':score>=70?'Strong':score>0?'Partial':'Protection off';
-  $('privacyText').textContent=score>=90?'Core QuietShield protection layers are active.':score>0?'Some protection layers are disabled.':'Turn on QuietShield protection to improve your score.';
+  $('privacyText').textContent=score>=90?'Core QuietShield protection layers are enabled.':score>0?'Some protection layers are disabled.':'Turn on QuietShield protection to restore coverage.';
   const preview=$('sitePreview'); preview.replaceChildren(); const modes=appState?.siteModes||{}; const entries=Object.entries(modes).slice(0,5);
   if(!entries.length){const n=document.createElement('span');n.className='empty';n.textContent='No custom site rules yet. Protected mode is the default.';preview.append(n);} else for(const [domain,mode] of entries){const chip=document.createElement('div');chip.className='site-chip';const b=document.createElement('b');b.textContent=domain;const s=document.createElement('span');s.textContent=mode[0].toUpperCase()+mode.slice(1);chip.append(b,s);preview.append(chip);}
 }

@@ -1,8 +1,10 @@
 (() => {
   const originalOpen = window.open.bind(window);
+  const originalNotificationRequest = typeof Notification !== 'undefined' && Notification.requestPermission ? Notification.requestPermission.bind(Notification) : null;
   const redirectHosts = new Set([
-    'popads.net','popcash.net','propellerads.com','onclickalgo.com','onclickgenius.com','onclickmax.com','clickadu.com','adsterra.com',
-    'exoclick.com','trafficjunky.com','juicyads.com','hilltopads.net','richads.com','pushground.com'
+    'popads.net','popcash.net','popcashjs.b-cdn.net','propellerads.com','onclickalgo.com','onclickgenius.com','onclickmax.com','onclickprediction.com',
+    'clickadu.com','clickadilla.com','clickaine.com','adsterra.com','exoclick.com','trafficjunky.com','juicyads.com','hilltopads.net','richads.com','pushground.com',
+    'megapopads.com','popup-traffic.com','popvertising.com','poprush.net','maxonclick.com','smartclick.net','superfastcdn.com','offpageads.com','plsdrct1.me','plsdrct2.me'
   ]);
 
   function flag(name) {
@@ -20,9 +22,51 @@
     return false;
   }
 
+  function isAdblockTestPage() {
+    const host = location.hostname.toLowerCase().replace(/^www\./, '');
+    if (host !== 'canyoublockit.com') return false;
+    return /\/(testing|extreme-test|advanced-adblocker-test)\/?/i.test(location.pathname);
+  }
+
+  function signal(type) {
+    try { window.postMessage({ source: 'quietshield-page-guard', type }, '*'); } catch {}
+  }
+
   window.open = function quietShieldOpen(url, target, features) {
-    if (flag('redirect-lock') && isKnownRedirector(url)) return null;
-    if (flag('popup-lock') && !navigator.userActivation?.isActive) return null;
+    const popupLock = flag('popup-lock');
+    const redirectLock = flag('redirect-lock');
+    const suspicious = isKnownRedirector(url);
+    const testPopunder = isAdblockTestPage();
+    if ((redirectLock && suspicious) || (popupLock && (!navigator.userActivation?.isActive || testPopunder))) {
+      signal('popup-blocked');
+      return null;
+    }
     return originalOpen(url, target, features);
   };
+
+  document.addEventListener('click', event => {
+    if (!flag('redirect-lock')) return;
+    const link = event.target?.closest?.('a[href]');
+    if (!link) return;
+    const url = link.href;
+    if (isKnownRedirector(url) || (isAdblockTestPage() && link.target === '_blank' && hostFrom(url) && hostFrom(url) !== hostFrom(location.href))) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      signal('popup-blocked');
+    }
+  }, true);
+
+  if (originalNotificationRequest) {
+    try {
+      Notification.requestPermission = function quietShieldNotificationPermission(callback) {
+        if (flag('annoyance-lock')) {
+          signal('notification-blocked');
+          const result = Promise.resolve('denied');
+          if (typeof callback === 'function') result.then(callback);
+          return result;
+        }
+        return originalNotificationRequest(callback);
+      };
+    } catch {}
+  }
 })();

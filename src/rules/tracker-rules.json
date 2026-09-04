@@ -1,11 +1,378 @@
 [
   {
     "id": 2001,
-    "priority": 10,
-    "action": {"type":"block"},
+    "priority": 18,
+    "action": {
+      "type": "block"
+    },
     "condition": {
-      "requestDomains": ["google-analytics.com","analytics.google.com","googletagmanager.com","connect.facebook.net","facebook.net","bat.bing.com","clarity.ms","hotjar.com","hotjar.io","segment.com","segment.io","mixpanel.com","amplitude.com","scorecardresearch.com","quantserve.com","comscore.com","chartbeat.com","branch.io","appsflyer.com","adjust.com","app-measurement.com","flurry.com","kochava.com","matomo.cloud","newrelic.com","nr-data.net","fullstory.com","mouseflow.com","crazyegg.com","luckyorange.com","heap.io","heapanalytics.com","optimizely.com","kissmetrics.io","plausible.io","posthog.com","sentry.io"],
-      "resourceTypes": ["script","image","xmlhttprequest","sub_frame","ping","other","websocket"]
+      "requestDomains": [
+        "adjust.com",
+        "adobedtm.com",
+        "analytics.google.com",
+        "amplitude.com",
+        "app-measurement.com",
+        "appsflyer.com",
+        "bat.bing.com",
+        "bluekai.com",
+        "branch.io",
+        "chartbeat.com",
+        "clarity.ms",
+        "comscore.com",
+        "connect.facebook.net",
+        "crazyegg.com",
+        "crwdcntrl.net",
+        "demdex.net",
+        "everesttech.net",
+        "facebook.net",
+        "flurry.com",
+        "fullstory.com",
+        "google-analytics.com",
+        "googletagmanager.com",
+        "heap.io",
+        "heapanalytics.com",
+        "hotjar.com",
+        "hotjar.io",
+        "kissmetrics.io",
+        "kochava.com",
+        "krxd.net",
+        "liveramp.com",
+        "luckyorange.com",
+        "matomo.cloud",
+        "mixpanel.com",
+        "mouseflow.com",
+        "newrelic.com",
+        "nr-data.net",
+        "omtrdc.net",
+        "optimizely.com",
+        "plausible.io",
+        "posthog.com",
+        "quantserve.com",
+        "rlcdn.com",
+        "rudderstack.com",
+        "scorecardresearch.com",
+        "segment.com",
+        "segment.io",
+        "sentry.io",
+        "snowplowanalytics.com",
+        "tapad.com",
+        "tealiumiq.com"
+      ],
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame",
+        "ping",
+        "other",
+        "websocket"
+      ]
+    }
+  },
+  {
+    "id": 2010,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/collect?",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2011,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/collect/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2012,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/analytics/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2013,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/analytics.js",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2014,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/beacon/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2015,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/beacon?",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2016,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/pixel/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2017,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/pixel?",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2018,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/telemetry/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2019,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/track/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2020,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/tracking/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2021,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/pageview/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2022,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/page-view/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2023,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/event.gif",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2024,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/events/collect",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2025,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/metrics/",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2026,
+    "priority": 8,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/rum?",
+      "domainType": "thirdParty",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
     }
   }
 ]

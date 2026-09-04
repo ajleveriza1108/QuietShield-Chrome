@@ -9,9 +9,9 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$Version = '1.0.3'
-$Revision = 'R4'
-$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R4.bat'
+$Version = '1.0.4'
+$Revision = 'R5'
+$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R5.bat'
 $PackageName = "QuietShield-Chrome-$Version-$Revision.zip"
 
 function Write-Step([string]$Text) {
@@ -127,7 +127,7 @@ function New-LoadUnpackedFolder {
     }
 
     if ([int]$readyManifestJson.manifest_version -ne 3 -or [string]$readyManifestJson.version -ne $Version) {
-        Fail 'LOAD-UNPACKED manifest identity does not match the validated R4 runtime.'
+        Fail 'LOAD-UNPACKED manifest identity does not match the validated R5 runtime.'
     }
 
     Write-Host "[PASS] Chrome Load Unpacked folder ready: $target" -ForegroundColor Green
@@ -365,14 +365,14 @@ Write-Host '[PASS] Manifest V3 validation passed.' -ForegroundColor Green
 Write-Host '[PASS] Runtime remote-code scan passed.' -ForegroundColor Green
 Write-Host '[PASS] DNR ruleset validation passed.' -ForegroundColor Green
 
-# R4 release contracts: no customer-facing developer endpoint override, no
+# R5 release contracts: no customer-facing developer endpoint override, no
 # hardcoded administrator credential, and the built-in service endpoint must
 # live only in the background licensing client.
 $runtimeTextFiles = @($jsFiles + $htmlFiles)
 Assert-TextPatternAbsent `
     -Files $runtimeTextFiles `
     -Pattern '(?i)Developer Configuration|QS_SET_LICENSE_ENDPOINT|endpoint override|Use built-in endpoint' `
-    -FailureLabel 'Customer-facing developer endpoint configuration was found in R4.'
+    -FailureLabel 'Customer-facing developer endpoint configuration was found in R5.'
 
 Assert-TextPatternAbsent `
     -Files $runtimeTextFiles `
@@ -390,10 +390,31 @@ if ($endpointHits.Count -ne 1 -or $endpointHits[0].Path -notlike '*\src\backgrou
 $packageBat = @(Get-ChildItem -LiteralPath $CanonicalRoot -File -Filter '*.bat')
 $packagePs1 = @(Get-ChildItem -LiteralPath (Join-Path $CanonicalRoot 'scripts') -File -Filter '*.ps1')
 if ($packageBat.Count -ne 1 -or $packagePs1.Count -ne 1) {
-    Fail 'R4 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
+    Fail 'R5 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
 }
 
-Write-Host '[PASS] R4 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
+# R5 functional blocker regression contracts. These are deliberately source-level
+# gates so a later package cannot silently ship the old detector/counter failures.
+$bootstrapCssPath = Join-Path $CanonicalRoot 'src\content\bootstrap.css'
+$contentJsPath = Join-Path $CanonicalRoot 'src\content\content.js'
+$pageGuardPath = Join-Path $CanonicalRoot 'src\content\page-guard.js'
+$popupJsPath = Join-Path $CanonicalRoot 'src\ui\popup.js'
+$adsRulesPath = Join-Path $CanonicalRoot 'src\rules\ads-rules.json'
+
+$bootstrapCss = Get-Content -LiteralPath $bootstrapCssPath -Raw
+$contentJs = Get-Content -LiteralPath $contentJsPath -Raw
+$pageGuardJs = Get-Content -LiteralPath $pageGuardPath -Raw
+$popupJs = Get-Content -LiteralPath $popupJsPath -Raw
+$adsRulesText = Get-Content -LiteralPath $adsRulesPath -Raw
+
+if ($bootstrapCss -notmatch '\.ad-widget') { Fail 'R5 detector contract missing: bootstrap.css must synchronously hide .ad-widget.' }
+if ($contentJs -notmatch 'semantic-ad-overlay' -or $contentJs -notmatch 'data-qs-bypass') { Fail 'R5 cosmetic/interstitial regression contract is missing.' }
+if ($pageGuardJs -notmatch 'canyoublockit\.com' -or $pageGuardJs -notmatch 'Notification\.requestPermission') { Fail 'R5 popup/push protection regression contract is missing.' }
+if ($popupJs -notmatch 'resolveTargetTab' -or $popupJs -notmatch 'lastAccessed' -or $popupJs -notmatch 'lock-tile') { Fail 'R5 popup web-tab fallback or quick-lock controls are missing.' }
+if ($adsRulesText -notmatch 'canyoublockit\.com' -or $adsRulesText -notmatch '"domainType"\s*:\s*"thirdParty"') { Fail 'R5 ad-path or CanYouBlockIt DNR coverage is missing.' }
+
+Write-Host '[PASS] R5 functional blocker regression contracts passed.' -ForegroundColor Green
+Write-Host '[PASS] R5 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
 
 Write-Step 'Create Chrome Load Unpacked folder'
 $loadUnpackedPath = New-LoadUnpackedFolder -ProjectRoot $CanonicalRoot
@@ -427,7 +448,7 @@ Invoke-GitChecked -Arguments @('add', '-A') -FailureMessage 'git add failed for 
 $changes = (& $script:GitExe status --porcelain | Out-String).Trim()
 if ($changes) {
     Invoke-GitChecked `
-        -Arguments @('commit', '-m', "QuietShield Chrome $Version $Revision R4 Chrome DNR resource-type compatibility fix") `
+        -Arguments @('commit', '-m', "QuietShield Chrome $Version $Revision functional blocker and GUI upgrade") `
         -FailureMessage 'Source repository commit failed.'
 } else {
     Write-Host '[INFO] Source repository has no uncommitted changes.' -ForegroundColor DarkGray

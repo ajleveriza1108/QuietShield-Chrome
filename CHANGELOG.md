@@ -1,27 +1,38 @@
 # Changelog
 
+## 1.0.4 R5
+
+- Expanded QuietShield from a starter blocker into a broader ad/tracker blocker with substantially larger packaged network-domain coverage.
+- Added EasyList-style third-party ad-path blocking for common ad servers, WordPress ad plugins, prebid/VAST assets, popunders and interstitial loaders.
+- Added same-origin CanYouBlockIt compatibility rules for self-hosted ad-test resources without blocking the test page navigation itself.
+- Added synchronous high-confidence cosmetic filtering at `document_start`, including `.ad-widget`, so standard adblock-detector tests can detect QuietShield immediately.
+- Added broader cosmetic selectors plus conservative semantic detection for full-screen advertising/interstitial overlays.
+- Strengthened Popup Lock to suppress pop-under behavior on aggressive ad-test pages and known redirect networks.
+- Annoyance Lock now rejects web-push permission prompts while enabled and records the action locally.
+- Expanded tracking-parameter cleanup.
+- Improved per-tab action accounting so cosmetic ad hides, popups and URL cleanups are reflected in the popup instead of showing misleading zeros.
+- Fixed the popup selecting the extension/options tab as the "current site"; it now falls back to the most recently used normal web tab.
+- Added real quick toggles for Ad, Tracker, Threat, Popup and Redirect protection directly in the popup.
+- Refined the dashboard layout, colors, protection-status ribbon and coverage meter.
+- Refreshed the QuietShield Android-style shield assets for better visibility at 16/32/48 px Chrome toolbar sizes while preserving the established logo shape.
+- Preserved hidden licensing endpoint configuration, administrator key safety and the same Code372 licensing backend contract.
+- Publisher continues creating a clean `LOAD-UNPACKED` folder automatically.
+
 ## 1.0.3 R4
 
 - Fixed Chrome DNR ruleset parsing failure caused by unsupported `worker` ResourceType in `security-rules.json`.
-- Security blocking now uses Chrome-supported request types while retaining main-frame, sub-frame, script, XHR, WebSocket and other coverage.
-- Added publisher validation that rejects any unsupported Chrome `declarativeNetRequest` ResourceType before Git publication or release packaging.
-- Preserved the R3 GUI, licensing, protection engine, hidden endpoint configuration, and Code372 backend integration.
-- Publisher now automatically recreates a clean `LOAD-UNPACKED` folder containing only `manifest.json`, `assets`, and `src` for direct selection in Chrome.
+- Added publisher validation that rejects unsupported Chrome `declarativeNetRequest` ResourceType values.
+- Added automatic `LOAD-UNPACKED` folder creation containing only `manifest.json`, `assets`, and `src`.
 
 ## 1.0.2 R3
 
 - Replaced the foundation UI with the approved QuietShield dark dashboard and compact popup.
-- Aligned Chrome icons with the established QuietShield green shield/check identity.
-- Removed all customer-facing Developer Configuration and license endpoint override controls.
+- Removed customer-facing Developer Configuration and license endpoint override controls.
 - Added independent MV3 rulesets for ads, trackers, threat/cryptomining domains, redirect networks, and optional HTTPS upgrades.
-- Added real persisted switches for every visible protection feature.
-- Added real Protected / Trusted / Blocked per-site modes.
-- Added popup lock, redirect guard, cosmetic cleanup, annoyance cleanup, and tracking-parameter cleanup.
-- Added local aggregate activity counters, seven-day dashboard charting, Privacy Score, and live Network Inspector.
-- Added customer license/trial/device-management UI to the new dashboard.
-- Added administrator activation support with a locally generated device RSA public key; administrator key is not persisted after successful activation.
-- Added Code372 same-server integration instructions for `quietshield.chrome`.
-- Strengthened the publisher with endpoint-UI, private-credential, package-contract, MV3, DNR and JavaScript validation gates.
+- Added persisted switches, Protected / Trusted / Blocked site modes, popup guard, cosmetic cleanup, annoyance cleanup and URL tracking cleanup.
+- Added local aggregate activity counters, seven-day dashboard charting and Network Inspector.
+- Added customer license/trial/device-management UI and administrator activation with a device-bound RSA public key.
+- Added Code372 same-server integration for `quietshield.chrome`.
 
 ## 1.0.1 R2
 

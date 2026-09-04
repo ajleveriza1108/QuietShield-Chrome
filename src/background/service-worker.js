@@ -3,31 +3,75 @@ import { addCounters, addDailyStats, clearActivity, ensureInstallId, getCounters
 import { callLicenseApi, listStoredLicenseDevices, refreshStoredLicense, removeStoredLicenseDevice } from './licensing.js';
 
 const tabTraffic = new Map();
-const MAX_DOMAINS_PER_TAB = 80;
+const MAX_DOMAINS_PER_TAB = 100;
 let settingsCache = { ...QS.DEFAULT_SETTINGS };
 let siteModesCache = {};
 let pendingStats = {};
 let flushTimer = null;
 let flushPromise = null;
 
+const AD_PATH_RE = /(?:^|[\/_?&.=-])(?:ads?|advert(?:s|ising|isement)?|adserver|adserve|admanager|adsense|banner(?:s|ads)?|sponsor(?:ed)?|prebid|interstitial|native[-_]?ads?|floating[-_]?ads?)(?:[\/_?&.=-]|$)/i;
+const TRACKER_PATH_RE = /(?:^|[\/_?&.=-])(?:analytics|collect|beacon|pixel|telemetry|tracking|pageview|metrics|events?\/collect)(?:[\/_?&.=-]|$)/i;
+const REDIRECT_PATH_RE = /(?:popunder|popup|exitpop|smartpop|\/afu\.php|\/apu\.php|redirect\?feed=|click\?pid=)/i;
+
 function normalizeDomain(value) {
   return String(value || '').trim().toLowerCase().replace(/^www\./, '').replace(/\.$/, '');
 }
 
+function safeUrl(url) {
+  try { return new URL(url); } catch { return null; }
+}
+
 function safeDomain(url) {
-  try { return normalizeDomain(new URL(url).hostname); } catch { return ''; }
+  const parsed = safeUrl(url);
+  return parsed ? normalizeDomain(parsed.hostname) : '';
 }
 
 function domainMatches(host, candidates) {
-  return candidates.some(domain => host === domain || host.endsWith(`.${domain}`));
+  return Boolean(host) && candidates.some(domain => host === domain || host.endsWith(`.${domain}`));
 }
 
-function classificationForDomain(domain) {
-  if (!domain) return '';
-  if (settingsCache.threatLock && domainMatches(domain, THREAT_DOMAINS)) return 'threatBlocked';
-  if (settingsCache.redirectLock && domainMatches(domain, REDIRECT_DOMAINS)) return 'redirectBlocked';
-  if (settingsCache.adLock && domainMatches(domain, AD_DOMAINS)) return 'adsBlocked';
-  if (settingsCache.trackerLock && domainMatches(domain, TRACKER_DOMAINS)) return 'trackersBlocked';
+function newTabState() {
+  return {
+    total: 0,
+    domains: new Map(),
+    categories: {},
+    cosmeticHidden: 0,
+    annoyanceHidden: 0,
+    trackingParamsCleaned: 0,
+    popupsBlocked: 0,
+    actionTotal: 0
+  };
+}
+
+function getTabState(tabId) {
+  let current = tabTraffic.get(tabId);
+  if (!current) {
+    current = newTabState();
+    tabTraffic.set(tabId, current);
+  }
+  return current;
+}
+
+function incrementTab(tabId, key, amount = 1) {
+  if (!Number.isInteger(tabId) || tabId < 0 || !amount) return;
+  const current = getTabState(tabId);
+  current[key] = Number(current[key] || 0) + Number(amount || 0);
+  current.actionTotal = Number(current.actionTotal || 0) + Number(amount || 0);
+}
+
+function incrementTabCategory(tabId, category, amount = 1) {
+  if (!Number.isInteger(tabId) || tabId < 0 || !category || !amount) return;
+  const current = getTabState(tabId);
+  current.categories[category] = Number(current.categories[category] || 0) + Number(amount || 0);
+  current.actionTotal = Number(current.actionTotal || 0) + Number(amount || 0);
+}
+
+function classificationForRequest(url, requestDomain) {
+  if (settingsCache.threatLock !== false && domainMatches(requestDomain, THREAT_DOMAINS)) return 'threatBlocked';
+  if (settingsCache.redirectLock !== false && (domainMatches(requestDomain, REDIRECT_DOMAINS) || REDIRECT_PATH_RE.test(String(url || '')))) return 'redirectBlocked';
+  if (settingsCache.adLock !== false && (domainMatches(requestDomain, AD_DOMAINS) || AD_PATH_RE.test(String(url || '')))) return 'adsBlocked';
+  if (settingsCache.trackerLock !== false && (domainMatches(requestDomain, TRACKER_DOMAINS) || TRACKER_PATH_RE.test(String(url || '')))) return 'trackersBlocked';
   return '';
 }
 
@@ -37,11 +81,13 @@ function pageDomainForRequest(details) {
 }
 
 function queueStat(name, amount = 1) {
-  pendingStats[name] = Number(pendingStats[name] || 0) + amount;
+  const numeric = Number(amount || 0);
+  if (!numeric) return;
+  pendingStats[name] = Number(pendingStats[name] || 0) + numeric;
   if (Object.values(pendingStats).reduce((sum, n) => sum + n, 0) >= 25) {
     void flushStats();
   } else if (!flushTimer) {
-    flushTimer = setTimeout(() => { flushTimer = null; void flushStats(); }, 2500);
+    flushTimer = setTimeout(() => { flushTimer = null; void flushStats(); }, 1500);
   }
 }
 
@@ -61,13 +107,15 @@ async function flushStats() {
 }
 
 function recordTraffic(details) {
-  if (details.tabId < 0 || settingsCache.networkInspector === false) return;
+  if (details.tabId < 0) return;
+  if (details.type === 'main_frame') tabTraffic.set(details.tabId, newTabState());
+  if (settingsCache.networkInspector === false) return;
   const requestDomain = safeDomain(details.url);
   if (!requestDomain) return;
 
-  const current = tabTraffic.get(details.tabId) || { total: 0, domains: new Map(), categories: {} };
+  const current = getTabState(details.tabId);
   current.total += 1;
-  const entry = current.domains.get(requestDomain) || { domain: requestDomain, requests: 0, types: {} };
+  const entry = current.domains.get(requestDomain) || { domain: requestDomain, requests: 0, blocked: 0, types: {} };
   entry.requests += 1;
   entry.types[details.type] = (entry.types[details.type] || 0) + 1;
   current.domains.set(requestDomain, entry);
@@ -75,7 +123,6 @@ function recordTraffic(details) {
     const least = [...current.domains.values()].sort((a, b) => a.requests - b.requests)[0];
     if (least) current.domains.delete(least.domain);
   }
-  tabTraffic.set(details.tabId, current);
 }
 
 function recordBlockedTraffic(details) {
@@ -84,12 +131,13 @@ function recordBlockedTraffic(details) {
   if (!requestDomain || settingsCache.enabled === false) return;
   const pageDomain = pageDomainForRequest(details);
   if (pageDomain && siteModesCache[pageDomain] === 'trusted') return;
-  const category = classificationForDomain(requestDomain);
-  if (!category) return;
+  const category = classificationForRequest(details.url, requestDomain) || 'otherBlocked';
 
-  const current = tabTraffic.get(details.tabId) || { total: 0, domains: new Map(), categories: {} };
-  current.categories[category] = Number(current.categories[category] || 0) + 1;
-  tabTraffic.set(details.tabId, current);
+  const current = getTabState(details.tabId);
+  incrementTabCategory(details.tabId, category, 1);
+  const entry = current.domains.get(requestDomain) || { domain: requestDomain, requests: 0, blocked: 0, types: {} };
+  entry.blocked = Number(entry.blocked || 0) + 1;
+  current.domains.set(requestDomain, entry);
   queueStat(category, 1);
 }
 
@@ -140,7 +188,12 @@ async function syncProtectionState() {
     disableRulesetIds: QS.RULESETS.filter(id => !active.has(id))
   });
   await syncSiteModeRules(master);
-  if (settingsCache.networkInspector === false) tabTraffic.clear();
+  if (settingsCache.networkInspector === false) {
+    for (const current of tabTraffic.values()) {
+      current.total = 0;
+      current.domains = new Map();
+    }
+  }
   return settingsCache;
 }
 
@@ -155,9 +208,12 @@ async function stateForTab(tabId) {
     getSettings(), getSiteModes(), getCounters(), getDailyStats(), chrome.storage.local.get(QS.STORAGE_KEYS.LICENSE), chrome.declarativeNetRequest.getEnabledRulesets()
   ]);
   const traffic = Number.isInteger(tabId) ? tabTraffic.get(tabId) : null;
-  const domains = traffic ? [...traffic.domains.values()].sort((a, b) => b.requests - a.requests).slice(0, 20) : [];
+  const domains = traffic ? [...traffic.domains.values()].sort((a, b) => (b.blocked || 0) - (a.blocked || 0) || b.requests - a.requests).slice(0, 24) : [];
   let badge = '';
-  if (Number.isInteger(tabId)) badge = await chrome.action.getBadgeText({ tabId });
+  if (Number.isInteger(tabId)) {
+    try { badge = await chrome.action.getBadgeText({ tabId }); } catch {}
+  }
+  const dnrCount = Number.parseInt(badge || '0', 10) || 0;
   return {
     ok: true,
     settings,
@@ -166,8 +222,17 @@ async function stateForTab(tabId) {
     dailyStats,
     enabledRulesets,
     license: storedLicense[QS.STORAGE_KEYS.LICENSE] || null,
-    blockedOnTab: Number.parseInt(badge || '0', 10) || 0,
-    traffic: { total: traffic?.total || 0, domains, categories: traffic?.categories || {} }
+    blockedOnTab: dnrCount,
+    traffic: {
+      total: traffic?.total || 0,
+      domains,
+      categories: traffic?.categories || {},
+      cosmeticHidden: traffic?.cosmeticHidden || 0,
+      annoyanceHidden: traffic?.annoyanceHidden || 0,
+      trackingParamsCleaned: traffic?.trackingParamsCleaned || 0,
+      popupsBlocked: traffic?.popupsBlocked || 0,
+      actionTotal: Math.max(dnrCount, traffic?.actionTotal || 0)
+    }
   };
 }
 
@@ -180,24 +245,29 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes[QS.STORAGE_KEYS.SETTINGS] || changes[QS.STORAGE_KEYS.SITE_MODES]) void syncProtectionState().catch(() => {});
 });
 
+async function enableActionBadge() {
+  await chrome.declarativeNetRequest.setExtensionActionOptions({ displayActionCountAsBadgeText: true });
+  await chrome.action.setBadgeBackgroundColor({ color: '#22c55e' });
+}
+
 chrome.runtime.onInstalled.addListener(() => {
   void (async () => {
     await ensureInstallId();
     await setSettings({});
     await syncProtectionState();
-    await chrome.declarativeNetRequest.setExtensionActionOptions({ displayActionCountAsBadgeText: true });
-    await chrome.action.setBadgeBackgroundColor({ color: '#2f9e44' });
+    await enableActionBadge();
   })().catch(() => {});
 });
 
 chrome.runtime.onStartup.addListener(() => {
   void (async () => {
     await syncProtectionState();
-    await chrome.declarativeNetRequest.setExtensionActionOptions({ displayActionCountAsBadgeText: true });
+    await enableActionBadge();
   })().catch(() => {});
 });
 
 void syncProtectionState().catch(() => {});
+void enableActionBadge().catch(() => {});
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   void (async () => {
@@ -223,8 +293,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
       case 'QS_COSMETIC_EVENT': {
         const delta = {};
-        if (message.hiddenCount) delta.cosmeticHidden = Number(message.hiddenCount);
-        if (message.cleanedParams) delta.trackingParamsCleaned = Number(message.cleanedParams);
+        const tabId = sender.tab?.id;
+        const adHidden = Math.max(0, Number(message.adHiddenCount || message.hiddenCount || 0));
+        const annoyanceHidden = Math.max(0, Number(message.annoyanceHiddenCount || 0));
+        const cleaned = Math.max(0, Number(message.cleanedParams || 0));
+        const popups = Math.max(0, Number(message.popupsBlocked || 0));
+        const annoyanceBlocked = Math.max(0, Number(message.annoyanceBlocked || 0));
+
+        if (adHidden) {
+          delta.adsBlocked = (delta.adsBlocked || 0) + adHidden;
+          delta.cosmeticHidden = (delta.cosmeticHidden || 0) + adHidden;
+          incrementTabCategory(tabId, 'adsBlocked', adHidden);
+          incrementTab(tabId, 'cosmeticHidden', adHidden);
+        }
+        if (annoyanceHidden) {
+          delta.annoyanceHidden = (delta.annoyanceHidden || 0) + annoyanceHidden;
+          delta.cosmeticHidden = (delta.cosmeticHidden || 0) + annoyanceHidden;
+          incrementTab(tabId, 'annoyanceHidden', annoyanceHidden);
+        }
+        if (cleaned) {
+          delta.trackingParamsCleaned = cleaned;
+          incrementTab(tabId, 'trackingParamsCleaned', cleaned);
+        }
+        if (popups) {
+          delta.popupsBlocked = popups;
+          incrementTab(tabId, 'popupsBlocked', popups);
+        }
+        if (annoyanceBlocked) {
+          delta.annoyanceBlocked = annoyanceBlocked;
+          incrementTab(tabId, 'annoyanceHidden', annoyanceBlocked);
+        }
         for (const [name, amount] of Object.entries(delta)) queueStat(name, amount);
         sendResponse({ ok: true });
         break;

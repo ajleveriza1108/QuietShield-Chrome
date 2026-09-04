@@ -1,0 +1,18 @@
+/* R5 synchronous high-confidence cosmetic layer.
+   It is active only until the content script marks a trusted/paused site with data-qs-bypass=1. */
+html:not([data-qs-bypass="1"]) .ad-widget,
+html:not([data-qs-bypass="1"]) .adsbygoogle,
+html:not([data-qs-bypass="1"]) .ad-unit,
+html:not([data-qs-bypass="1"]) .ad-slot,
+html:not([data-qs-bypass="1"]) .ad-banner,
+html:not([data-qs-bypass="1"]) .advertisement,
+html:not([data-qs-bypass="1"]) .sponsored-ad,
+html:not([data-qs-bypass="1"]) [data-ad-slot],
+html:not([data-qs-bypass="1"]) [data-ad-client],
+html:not([data-qs-bypass="1"]) [id^="google_ads_"],
+html:not([data-qs-bypass="1"]) [id*="google_ads_iframe"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
