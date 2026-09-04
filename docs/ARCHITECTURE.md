@@ -1,9 +1,9 @@
-# QuietShield Chrome R6 architecture
+# QuietShield Chrome R7 architecture
 
 ## UI
 - `src/ui/popup.*`: active-site protection, master switch, live counters, site mode, Network Inspector.
 - `src/ui/options.*`: Home, Protection, Sites, Activity, License, Settings and About.
-- There are no placeholder Family or developer-endpoint pages in R6.
+- There are no placeholder Family or developer-endpoint pages in R7.
 
 ## Request protection
 - `qs_ads`: known advertising networks.

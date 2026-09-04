@@ -33,6 +33,7 @@ function domainMatches(host, candidates) {
 
 function newTabState() {
   return {
+    startedAt: Date.now(),
     total: 0,
     domains: new Map(),
     categories: {},
@@ -203,12 +204,66 @@ async function applySiteMode(domain, mode) {
   await syncSiteModeRules(settingsCache.enabled !== false);
 }
 
+
+function dnrCategoryForMatchedRule(rule) {
+  const rulesetId = String(rule?.rulesetId || '');
+  const ruleId = Number(rule?.ruleId || 0);
+  if (rulesetId === 'qs_ads' || (ruleId >= 1000 && ruleId < 2000)) return 'adsBlocked';
+  if (rulesetId === 'qs_trackers' || (ruleId >= 2000 && ruleId < 3000)) return 'trackersBlocked';
+  if (rulesetId === 'qs_security' || (ruleId >= 3000 && ruleId < 4000)) return 'threatBlocked';
+  if (rulesetId === 'qs_redirects' || (ruleId >= 4000 && ruleId < 5000)) return 'redirectBlocked';
+  if (rulesetId === '_dynamic' && ruleId >= 100000) return 'siteRule';
+  return 'otherBlocked';
+}
+
+async function matchedDnrForTab(tabId, minTimeStamp) {
+  if (!Number.isInteger(tabId) || tabId < 0) return { available: false, count: 0, categories: {} };
+  try {
+    const result = await chrome.declarativeNetRequest.getMatchedRules({ tabId, minTimeStamp: Number(minTimeStamp || 0) });
+    const rows = Array.isArray(result?.rulesMatchedInfo) ? result.rulesMatchedInfo : [];
+    const categories = {};
+    for (const row of rows) {
+      const category = dnrCategoryForMatchedRule(row.rule);
+      if (category === 'siteRule') continue;
+      categories[category] = Number(categories[category] || 0) + 1;
+    }
+    return { available: true, count: Object.values(categories).reduce((sum, n) => sum + Number(n || 0), 0), categories };
+  } catch {
+    return { available: false, count: 0, categories: {} };
+  }
+}
+
+async function runEngineSelfTest() {
+  const tests = [
+    { name: 'Google display ad script', url: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', type: 'script', expected: 'qs_ads' },
+    { name: 'Same-origin Advanced Ads asset', url: 'https://example.com/wp-content/plugins/advanced-ads/public/assets/js/advanced.min.js', type: 'script', expected: 'qs_ads' },
+    { name: 'Native ad widget asset', url: 'https://example.com/native-ads/widget.js', type: 'script', expected: 'qs_ads' },
+    { name: 'Google Analytics collection', url: 'https://www.google-analytics.com/g/collect?v=2', type: 'xmlhttprequest', expected: 'qs_trackers' },
+    { name: 'Cryptomining script', url: 'https://coinhive.com/lib/coinhive.min.js', type: 'script', expected: 'qs_security' },
+    { name: 'Pop-under network', url: 'https://popads.net/pop.js', type: 'script', expected: 'qs_redirects' }
+  ];
+  const results = [];
+  for (const test of tests) {
+    try {
+      const outcome = await chrome.declarativeNetRequest.testMatchOutcome({ url: test.url, type: test.type, initiator: 'https://example.com/' });
+      const matched = Array.isArray(outcome?.matchedRules) ? outcome.matchedRules : [];
+      const passed = matched.some(rule => String(rule.rulesetId || '') === test.expected);
+      results.push({ ...test, passed, matched: matched.map(rule => ({ ruleId: rule.ruleId, rulesetId: rule.rulesetId })) });
+    } catch (error) {
+      return { ok: false, available: false, code: 'SELF_TEST_UNAVAILABLE', message: error?.message || 'Chrome DNR self-test is unavailable. Load QuietShield as an unpacked extension and try again.', results };
+    }
+  }
+  const passed = results.filter(row => row.passed).length;
+  return { ok: passed === results.length, available: true, passed, total: results.length, results, message: passed === results.length ? `All ${passed} network-engine tests passed.` : `${passed} of ${results.length} network-engine tests passed.` };
+}
+
 async function stateForTab(tabId) {
   const [settings, siteModes, counters, dailyStats, storedLicense, enabledRulesets] = await Promise.all([
     getSettings(), getSiteModes(), getCounters(), getDailyStats(), chrome.storage.local.get(QS.STORAGE_KEYS.LICENSE), chrome.declarativeNetRequest.getEnabledRulesets()
   ]);
   const traffic = Number.isInteger(tabId) ? tabTraffic.get(tabId) : null;
   const domains = traffic ? [...traffic.domains.values()].sort((a, b) => (b.blocked || 0) - (a.blocked || 0) || b.requests - a.requests).slice(0, 24) : [];
+  const matchedDnr = await matchedDnrForTab(tabId, traffic?.startedAt || (Date.now() - 5 * 60 * 1000));
   let badge = '';
   if (Number.isInteger(tabId)) {
     try { badge = await chrome.action.getBadgeText({ tabId }); } catch {}
@@ -222,11 +277,14 @@ async function stateForTab(tabId) {
     dailyStats,
     enabledRulesets,
     license: storedLicense[QS.STORAGE_KEYS.LICENSE] || null,
-    blockedOnTab: dnrCount,
+    blockedOnTab: Math.max(dnrCount, matchedDnr.count || 0),
     traffic: {
       total: traffic?.total || 0,
       domains,
       categories: traffic?.categories || {},
+      dnrAvailable: matchedDnr.available,
+      dnrCategories: matchedDnr.categories || {},
+      dnrMatched: matchedDnr.count || 0,
       cosmeticHidden: traffic?.cosmeticHidden || 0,
       annoyanceHidden: traffic?.annoyanceHidden || 0,
       trackingParamsCleaned: traffic?.trackingParamsCleaned || 0,
@@ -327,6 +385,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ ok: true });
         break;
       }
+      case 'QS_ENGINE_SELF_TEST':
+        sendResponse(await runEngineSelfTest());
+        break;
       case 'QS_CLEAR_ACTIVITY':
         if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
         if (flushPromise) await flushPromise;

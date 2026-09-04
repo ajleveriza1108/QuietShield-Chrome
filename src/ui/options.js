@@ -95,6 +95,50 @@ function licenseDisplay() {
 function showLicense(message,ok=false){const node=$('licenseStatus');node.textContent=message;node.className=`status ${ok?'ok':'bad'}`;}
 function renderDevices(response){const list=$('deviceList');list.replaceChildren();list.hidden=false;if(!response?.ok){const p=document.createElement('p');p.className='empty';p.textContent=response?.message||'Device list unavailable.';list.append(p);return;}const devices=Array.isArray(response.devices)?response.devices:[];if(!devices.length){const p=document.createElement('p');p.className='empty';p.textContent='No device records returned.';list.append(p);return;}for(const d of devices){const row=document.createElement('div');row.className='device-row';const text=document.createElement('div');const b=document.createElement('b');b.textContent=d.deviceName||d.platform||'QuietShield device';const s=document.createElement('small');s.textContent=`${d.platform||'Unknown'} · ${d.status||'unknown'}${d.lastSeenAt?` · last seen ${new Date(d.lastSeenAt).toLocaleString()}`:''}`;text.append(b,s);row.append(text);if(d.status==='active'&&d.deviceHash){const btn=document.createElement('button');btn.textContent='Remove';btn.addEventListener('click',async()=>{if(!confirm(`Remove ${d.deviceName||'this device'} from this QuietShield license?`))return;btn.disabled=true;const res=await chrome.runtime.sendMessage({type:'QS_LICENSE_REMOVE_DEVICE',targetDeviceHash:d.deviceHash});showLicense(res?.message||(res?.ok?'Device removed.':'Could not remove device.'),Boolean(res?.ok));if(res?.ok){const refreshed=await chrome.runtime.sendMessage({type:'QS_LICENSE_LIST_DEVICES'});renderDevices(refreshed);}else btn.disabled=false;});row.append(btn);}list.append(row);}}
 
+
+function renderEngineSelfTest(response) {
+  const status = $('engineSelfTestResult');
+  const rows = $('engineSelfTestRows');
+  rows.replaceChildren();
+  rows.hidden = false;
+  if (!response?.available) {
+    status.textContent = response?.message || 'Chrome DNR self-test is unavailable.';
+    status.className = 'status bad';
+    return;
+  }
+  status.textContent = response.message || `${response.passed || 0} of ${response.total || 0} tests passed.`;
+  status.className = `status ${response.ok ? 'ok' : 'bad'}`;
+  for (const test of response.results || []) {
+    const row = document.createElement('div');
+    row.className = 'device-row';
+    const text = document.createElement('div');
+    const b = document.createElement('b');
+    b.textContent = `${test.passed ? 'PASS' : 'FAIL'} · ${test.name}`;
+    const small = document.createElement('small');
+    const matched = (test.matched || []).map(item => `${item.rulesetId || 'ruleset'} #${item.ruleId}`).join(', ');
+    small.textContent = matched || `Expected ${test.expected}`;
+    text.append(b, small);
+    row.append(text);
+    rows.append(row);
+  }
+}
+
+async function runEngineSelfTest() {
+  const button = $('runEngineSelfTest');
+  const status = $('engineSelfTestResult');
+  button.disabled = true;
+  status.textContent = 'Running QuietShield network-engine tests...';
+  status.className = 'status';
+  try {
+    const response = await chrome.runtime.sendMessage({ type: 'QS_ENGINE_SELF_TEST' });
+    renderEngineSelfTest(response);
+  } catch (error) {
+    renderEngineSelfTest({ available: false, message: error?.message || String(error) });
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function renderSettings(){ document.querySelectorAll('[data-setting]').forEach(input=>input.checked=settings()[input.dataset.setting]===true || (input.dataset.setting!=='httpsUpgrade'&&settings()[input.dataset.setting]!==false)); }
 function renderSide(){const on=settings().enabled!==false;$('sideProtection').textContent=on?'ON':'OFF';$('sideProtection').style.color=on?'var(--green)':'#aaa';$('sideProtectionText').textContent=on?'QuietShield is actively protecting you.':'Protection is paused.';}
 
@@ -103,6 +147,7 @@ async function refresh(){await getState();renderSide();renderHome();renderProtec
 function showSection(name){const valid=['home','protection','sites','activity','license','settings','about'].includes(name)?name:'home';document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`section-${valid}`));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.section===valid));history.replaceState(null,'',`#${valid}`);window.scrollTo({top:0});}
 document.querySelectorAll('[data-section],.link-nav').forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.section)));
 $('masterEnabled').addEventListener('change',e=>patchSettings({enabled:e.target.checked}));
+$('runEngineSelfTest').addEventListener('click',runEngineSelfTest);
 document.querySelectorAll('[data-setting]').forEach(input=>input.addEventListener('change',()=>patchSettings({[input.dataset.setting]:input.checked})));
 $('saveSite').addEventListener('click',async()=>{const domain=normalizeDomainInput($('siteInput').value);if(!domain){alert('Enter a valid site domain, for example example.com.');return;}await chrome.runtime.sendMessage({type:'QS_SET_SITE_MODE',domain,mode:$('siteModeInput').value});$('siteInput').value='';await refresh();showSection('sites');});
 $('siteInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('saveSite').click();});

@@ -1,51 +1,16 @@
-# QuietShield Chrome 1.0.5 R6 acceptance plan
+# QuietShield Chrome 1.0.6 R7 Final Acceptance Plan
 
-R6 is not considered complete merely because the dashboard opens.
-
-## Chrome load
-
-1. Run `START-PUBLISH-QUIETSHIELD-CHROME-R6.bat` normally, not as Administrator.
-2. Select `D:\Windows Projects\QuietShield-Chrome\LOAD-UNPACKED` in `chrome://extensions`.
-3. Confirm there are no Manifest/DNR/service-worker errors.
-
-## CanYouBlockIt
-
-1. Disable other ad blockers for the test so QuietShield is isolated.
-2. Visit the CanYouBlockIt Adblock Detector. QuietShield should be detected because the `.ad-widget` detector bait is synchronously hidden.
-3. Visit Simple Test `/testing/`; the self-hosted interstitial/ad elements should be hidden.
-4. Visit eXtreme Test; third-party banner/pop-under/redirect resources should be blocked where they match packaged rules.
-5. Click on the eXtreme/Pop-Under test page. Popup Lock should suppress the advertising pop-under.
-6. Re-open QuietShield while the dashboard tab is active; the popup should show the most recently used normal website, not the extension ID.
-
-## Switch behavior
-
-- Ad Lock OFF then reload: ad filtering should reduce/stop while other layers remain active.
-- Tracker Lock OFF: tracker ruleset disables independently.
-- Threat Lock OFF: security ruleset disables independently.
-- Popup Lock OFF: `window.open` guard no longer suppresses its popup test behavior.
-- Redirect Lock OFF: redirect ruleset disables independently.
-- Master Protection OFF: packaged rulesets and page protection pause.
-- Trusted site: site bypass takes precedence over ordinary protection.
-- Blocked site: top-level navigation is blocked.
-
-## Counters
-
-- Network blocks should increase page action/badge counts.
-- Cosmetic ad hides should increase Ads Blocked and cosmetic totals.
-- URL tracking cleanup should increase cleanup totals.
-- Popup suppression should increase popup totals.
-- Network Inspector should list request domains only while enabled and only in service-worker memory.
-
-## Licensing
-
-Live Chrome activation requires the existing QuietShield Apps Script deployment to be updated to Code372 so `quietshield.chrome` is authorized. Test customer key, trial, administrator key, refresh, list devices and remove device after server deployment.
-
-
-## R6 publisher logging test
-
-1. Run the R6 BAT normally.
-2. Confirm the log path is printed before preflight.
-3. Confirm `LATEST.log` exists after the run.
-4. Confirm the window remains open after success.
-5. Temporarily break a harmless preflight condition in a disposable copy and confirm the failure remains visible and appears in the log.
-6. Confirm only one publisher BAT process is used; canonical installation must not relaunch another BAT.
+1. Run `START-PUBLISH-QUIETSHIELD-CHROME-R7.bat` normally.
+2. Confirm the BAT remains open and prints the persistent log and `LATEST.log` paths.
+3. In `chrome://extensions`, load `D:\Windows Projects\QuietShield-Chrome\LOAD-UNPACKED`.
+4. Confirm there are no extension Errors.
+5. Open Dashboard -> Protection -> Run self-test. Require all network-engine tests PASS.
+6. With all other ad blockers/Brave Shields disabled for the test site, open the CanYouBlockIt Adblock Detector page and confirm the detector bait is hidden.
+7. Test web banners, pop-under, push-notification and eXtreme pages separately.
+8. Verify the popup shows the real current website, DNR action count, category counts and live domains.
+9. Toggle Ad Lock off/on and reload the test page; behavior must change.
+10. Set a site to Trusted and reload; QuietShield must stop normal blocking for that site. Return it to Protected afterward.
+11. Verify Popup Lock and Redirect Lock independently.
+12. Verify URL Cleaner removes supported tracking parameters.
+13. Verify License activation/trial/refresh against deployed Code372.
+14. Verify administrator activation is device-bound and the administrator key is not retained after success.

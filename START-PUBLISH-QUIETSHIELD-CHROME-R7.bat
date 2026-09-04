@@ -2,7 +2,7 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 
-title QuietShield Chrome 1.0.5 R6 Publisher
+title QuietShield Chrome 1.0.6 R7 Publisher
 
 set "QS_LOGROOT=D:\QuietShield-Chrome-Logs"
 if not exist "D:\" set "QS_LOGROOT=%LOCALAPPDATA%\QuietShield\Chrome\Logs"
@@ -11,20 +11,20 @@ if not exist "%QS_LOGROOT%" mkdir "%QS_LOGROOT%" >nul 2>&1
 for /f %%I in ('powershell.exe -NoLogo -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "QS_STAMP=%%I"
 if not defined QS_STAMP set "QS_STAMP=unknown-time"
 
-set "QS_LOG=%QS_LOGROOT%\QuietShield-Chrome-1.0.5-R6-%QS_STAMP%.log"
+set "QS_LOG=%QS_LOGROOT%\QuietShield-Chrome-1.0.6-R7-%QS_STAMP%.log"
 set "QS_LATEST=%QS_LOGROOT%\LATEST.log"
-set "QS_PS1=%~dp0scripts\PUBLISH-QUIETSHIELD-CHROME-R6.ps1"
-set "QS_PARSE_TMP=%TEMP%\QuietShield-Chrome-R6-parser-%RANDOM%-%RANDOM%.txt"
+set "QS_PS1=%~dp0scripts\PUBLISH-QUIETSHIELD-CHROME-R7.ps1"
+set "QS_PARSE_TMP=%TEMP%\QuietShield-Chrome-R7-parser-%RANDOM%-%RANDOM%.txt"
 
 >"%QS_LOG%" echo ============================================================
->>"%QS_LOG%" echo QuietShield Chrome 1.0.5 R6 - DURABLE PUBLISHER LOG
+>>"%QS_LOG%" echo QuietShield Chrome 1.0.6 R7 - DURABLE PUBLISHER LOG
 >>"%QS_LOG%" echo Started: %DATE% %TIME%
 >>"%QS_LOG%" echo Launcher: %~f0
 >>"%QS_LOG%" echo ============================================================
 
 cls
 echo ============================================================
-echo QuietShield Chrome 1.0.5 R6 - CLEAN BUILD + TWO-REPO PUBLISHER
+echo QuietShield Chrome 1.0.6 R7 - CLEAN BUILD + TWO-REPO PUBLISHER
 echo ============================================================
 echo Run normally - DO NOT Run as Administrator.
 echo Requires PowerShell 7.
@@ -73,7 +73,7 @@ if not "%RC%"=="0" (
     copy /y "%QS_LOG%" "%QS_LATEST%" >nul 2>&1
     echo.
     echo ============================================================
-    echo [FAIL] R6 DID NOT PUBLISH
+    echo [FAIL] R7 DID NOT PUBLISH
     echo [LOG] %QS_LOG%
     echo ============================================================
     echo.
@@ -97,9 +97,9 @@ copy /y "%QS_LOG%" "%QS_LATEST%" >nul 2>&1
 echo.
 echo ============================================================
 if "%RC%"=="0" (
-    echo [PASS] QuietShield Chrome 1.0.5 R6 completed successfully.
+    echo [PASS] QuietShield Chrome 1.0.6 R7 completed successfully.
 ) else (
-    echo [FAIL] QuietShield Chrome 1.0.5 R6 stopped with exit code %RC%.
+    echo [FAIL] QuietShield Chrome 1.0.6 R7 stopped with exit code %RC%.
 )
 echo [LOG] %QS_LOG%
 echo [LATEST LOG] %QS_LATEST%

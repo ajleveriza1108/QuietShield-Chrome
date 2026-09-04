@@ -83,10 +83,18 @@ function renderLocks() {
 function render() {
   const enabled = state?.settings?.enabled !== false;
   const mode = currentDomain ? (state?.siteModes?.[currentDomain] || 'protected') : 'protected';
-  const cat = state?.traffic?.categories || {};
-  const categorySum = Number(cat.adsBlocked || 0) + Number(cat.trackersBlocked || 0) + Number(cat.threatBlocked || 0) + Number(cat.redirectBlocked || 0) + Number(cat.otherBlocked || 0);
-  const blockedNetwork = Math.max(Number(state?.blockedOnTab || 0), categorySum);
-  const totalActions = Math.max(blockedNetwork, Number(state?.traffic?.actionTotal || 0));
+  const observed = state?.traffic?.categories || {};
+  const matched = state?.traffic?.dnrCategories || {};
+  const cat = {
+    adsBlocked: Math.max(Number(observed.adsBlocked || 0), Number(matched.adsBlocked || 0)),
+    trackersBlocked: Math.max(Number(observed.trackersBlocked || 0), Number(matched.trackersBlocked || 0)),
+    threatBlocked: Math.max(Number(observed.threatBlocked || 0), Number(matched.threatBlocked || 0)),
+    redirectBlocked: Math.max(Number(observed.redirectBlocked || 0), Number(matched.redirectBlocked || 0)),
+    otherBlocked: Math.max(Number(observed.otherBlocked || 0), Number(matched.otherBlocked || 0))
+  };
+  const categorySum = cat.adsBlocked + cat.trackersBlocked + cat.threatBlocked + cat.redirectBlocked + cat.otherBlocked;
+  const blockedNetwork = Math.max(Number(state?.blockedOnTab || 0), Number(state?.traffic?.dnrMatched || 0), categorySum);
+  const totalActions = Math.max(blockedNetwork + Number(state?.traffic?.cosmeticHidden || 0) + Number(state?.traffic?.popupsBlocked || 0), Number(state?.traffic?.actionTotal || 0));
 
   $('enabled').checked = enabled;
   $('site').textContent = currentDomain || 'No web page selected';

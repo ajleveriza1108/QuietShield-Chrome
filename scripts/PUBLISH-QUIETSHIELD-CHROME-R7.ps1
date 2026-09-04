@@ -10,9 +10,9 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$Version = '1.0.5'
-$Revision = 'R6'
-$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R6.bat'
+$Version = '1.0.6'
+$Revision = 'R7'
+$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R7.bat'
 $PackageName = "QuietShield-Chrome-$Version-$Revision.zip"
 
 function Write-Step([string]$Text) {
@@ -128,7 +128,7 @@ function New-LoadUnpackedFolder {
     }
 
     if ([int]$readyManifestJson.manifest_version -ne 3 -or [string]$readyManifestJson.version -ne $Version) {
-        Fail 'LOAD-UNPACKED manifest identity does not match the validated R6 runtime.'
+        Fail 'LOAD-UNPACKED manifest identity does not match the validated R7 runtime.'
     }
 
     Write-Host "[PASS] Chrome Load Unpacked folder ready: $target" -ForegroundColor Green
@@ -390,14 +390,14 @@ Write-Host '[PASS] Manifest V3 validation passed.' -ForegroundColor Green
 Write-Host '[PASS] Runtime remote-code scan passed.' -ForegroundColor Green
 Write-Host '[PASS] DNR ruleset validation passed.' -ForegroundColor Green
 
-# R6 release contracts: no customer-facing developer endpoint override, no
+# R7 release contracts: no customer-facing developer endpoint override, no
 # hardcoded administrator credential, and the built-in service endpoint must
 # live only in the background licensing client.
 $runtimeTextFiles = @($jsFiles + $htmlFiles)
 Assert-TextPatternAbsent `
     -Files $runtimeTextFiles `
     -Pattern '(?i)Developer Configuration|QS_SET_LICENSE_ENDPOINT|endpoint override|Use built-in endpoint' `
-    -FailureLabel 'Customer-facing developer endpoint configuration was found in R6.'
+    -FailureLabel 'Customer-facing developer endpoint configuration was found in R7.'
 
 Assert-TextPatternAbsent `
     -Files $runtimeTextFiles `
@@ -415,31 +415,46 @@ if ($endpointHits.Count -ne 1 -or $endpointHits[0].Path -notlike '*\src\backgrou
 $packageBat = @(Get-ChildItem -LiteralPath $CanonicalRoot -File -Filter '*.bat')
 $packagePs1 = @(Get-ChildItem -LiteralPath (Join-Path $CanonicalRoot 'scripts') -File -Filter '*.ps1')
 if ($packageBat.Count -ne 1 -or $packagePs1.Count -ne 1) {
-    Fail 'R6 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
+    Fail 'R7 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
 }
 
-# R6 functional blocker regression contracts. These are deliberately source-level
-# gates so a later package cannot silently ship the old detector/counter failures.
+# R7 final-release functional regression contracts. These source-level gates
+# prevent a future package from silently dropping the blocker fixes validated here.
 $bootstrapCssPath = Join-Path $CanonicalRoot 'src\content\bootstrap.css'
 $contentJsPath = Join-Path $CanonicalRoot 'src\content\content.js'
 $pageGuardPath = Join-Path $CanonicalRoot 'src\content\page-guard.js'
+$serviceWorkerPath = Join-Path $CanonicalRoot 'src\background\service-worker.js'
 $popupJsPath = Join-Path $CanonicalRoot 'src\ui\popup.js'
+$optionsHtmlPath = Join-Path $CanonicalRoot 'src\ui\options.html'
 $adsRulesPath = Join-Path $CanonicalRoot 'src\rules\ads-rules.json'
+$launcherPath = Join-Path $CanonicalRoot $LauncherName
 
 $bootstrapCss = Get-Content -LiteralPath $bootstrapCssPath -Raw
 $contentJs = Get-Content -LiteralPath $contentJsPath -Raw
 $pageGuardJs = Get-Content -LiteralPath $pageGuardPath -Raw
+$serviceWorkerJs = Get-Content -LiteralPath $serviceWorkerPath -Raw
 $popupJs = Get-Content -LiteralPath $popupJsPath -Raw
+$optionsHtml = Get-Content -LiteralPath $optionsHtmlPath -Raw
 $adsRulesText = Get-Content -LiteralPath $adsRulesPath -Raw
+$launcherText = Get-Content -LiteralPath $launcherPath -Raw
+$adsRules = @(Get-Content -LiteralPath $adsRulesPath -Raw | ConvertFrom-Json)
 
-if ($bootstrapCss -notmatch '\.ad-widget') { Fail 'R6 detector contract missing: bootstrap.css must synchronously hide .ad-widget.' }
-if ($contentJs -notmatch 'semantic-ad-overlay' -or $contentJs -notmatch 'data-qs-bypass') { Fail 'R6 cosmetic/interstitial regression contract is missing.' }
-if ($pageGuardJs -notmatch 'canyoublockit\.com' -or $pageGuardJs -notmatch 'Notification\.requestPermission') { Fail 'R6 popup/push protection regression contract is missing.' }
-if ($popupJs -notmatch 'resolveTargetTab' -or $popupJs -notmatch 'lastAccessed' -or $popupJs -notmatch 'lock-tile') { Fail 'R6 popup web-tab fallback or quick-lock controls are missing.' }
-if ($adsRulesText -notmatch 'canyoublockit\.com' -or $adsRulesText -notmatch '"domainType"\s*:\s*"thirdParty"') { Fail 'R6 ad-path or CanYouBlockIt DNR coverage is missing.' }
+if ($bootstrapCss -notmatch '\.ad-widget') { Fail 'R7 detector contract missing: bootstrap.css must synchronously hide .ad-widget.' }
+if ($bootstrapCss -notmatch '\.native-ad' -or $bootstrapCss -notmatch '\[data-sponsored\]') { Fail 'R7 synchronous native/sponsored cosmetic coverage is missing.' }
+if ($contentJs -notmatch 'semantic-native-ad' -or $contentJs -notmatch 'semantic-sponsored-card') { Fail 'R7 native/sponsored semantic filtering contract is missing.' }
+if ($contentJs -notmatch 'anti-adblock-overlay' -or $contentJs -notmatch 'EDITORIAL_EXAMPLE_RE') { Fail 'R7 anti-adblock/editorial-safety contract is missing.' }
+if ($contentJs -notmatch 'semantic-ad-overlay' -or $contentJs -notmatch 'data-qs-bypass') { Fail 'R7 cosmetic/interstitial regression contract is missing.' }
+if ($pageGuardJs -notmatch 'window\.open' -or $pageGuardJs -notmatch 'HTMLAnchorElement\.prototype\.click' -or $pageGuardJs -notmatch 'Notification\.requestPermission') { Fail 'R7 popup/redirect/push guard contract is missing.' }
+if ($serviceWorkerJs -notmatch 'getMatchedRules' -or $serviceWorkerJs -notmatch 'testMatchOutcome' -or $serviceWorkerJs -notmatch 'QS_ENGINE_SELF_TEST') { Fail 'R7 exact DNR feedback or Engine Self-Test contract is missing.' }
+if ($popupJs -notmatch 'dnrCategories' -or $popupJs -notmatch 'resolveTargetTab' -or $popupJs -notmatch 'lastAccessed') { Fail 'R7 popup DNR category counters or real-web-tab fallback are missing.' }
+if ($optionsHtml -notmatch 'Protection Engine Self-Test' -or $optionsHtml -notmatch 'runEngineSelfTest') { Fail 'R7 dashboard Engine Self-Test controls are missing.' }
+if ($adsRules.Count -lt 80) { Fail "R7 ads ruleset is unexpectedly small: $($adsRules.Count) rules." }
+if ($adsRulesText -notmatch '/wp-content/plugins/advanced-ads/' -or $adsRulesText -notmatch '/native-ads/' -or $adsRulesText -notmatch 'amazon-adsystem\.com') { Fail 'R7 same-origin/native advertising DNR coverage is missing.' }
+if (@($manifest.permissions) -notcontains 'declarativeNetRequestFeedback') { Fail 'R7 requires declarativeNetRequestFeedback for unpacked-extension matched-rule diagnostics.' }
+if ($launcherText -notmatch 'LATEST\.log' -or $launcherText -notmatch 'pause' -or $launcherText -notmatch 'QS_LOG') { Fail 'R7 durable BAT logging/window-retention contract is missing.' }
 
-Write-Host '[PASS] R6 functional blocker regression contracts passed.' -ForegroundColor Green
-Write-Host '[PASS] R6 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
+Write-Host '[PASS] R7 final functional blocker regression contracts passed.' -ForegroundColor Green
+Write-Host '[PASS] R7 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
 
 Write-Step 'Create Chrome Load Unpacked folder'
 $loadUnpackedPath = New-LoadUnpackedFolder -ProjectRoot $CanonicalRoot

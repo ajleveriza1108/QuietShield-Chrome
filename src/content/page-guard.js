@@ -1,5 +1,6 @@
 (() => {
   const originalOpen = window.open.bind(window);
+  const originalAnchorClick = HTMLAnchorElement.prototype.click;
   const originalNotificationRequest = typeof Notification !== 'undefined' && Notification.requestPermission ? Notification.requestPermission.bind(Notification) : null;
   const redirectHosts = new Set([
     'popads.net','popcash.net','popcashjs.b-cdn.net','propellerads.com','onclickalgo.com','onclickgenius.com','onclickmax.com','onclickprediction.com',
@@ -43,6 +44,20 @@
     }
     return originalOpen(url, target, features);
   };
+
+  try {
+    HTMLAnchorElement.prototype.click = function quietShieldAnchorClick() {
+      if (flag('redirect-lock')) {
+        const url = this.href;
+        const crossOriginBlank = isAdblockTestPage() && this.target === '_blank' && hostFrom(url) && hostFrom(url) !== hostFrom(location.href);
+        if (isKnownRedirector(url) || crossOriginBlank) {
+          signal('popup-blocked');
+          return;
+        }
+      }
+      return originalAnchorClick.call(this);
+    };
+  } catch {}
 
   document.addEventListener('click', event => {
     if (!flag('redirect-lock')) return;

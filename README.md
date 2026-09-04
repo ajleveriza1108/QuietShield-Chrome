@@ -1,63 +1,62 @@
-# QuietShield Chrome 1.0.5 R6
+# QuietShield Chrome 1.0.6 R7 — Final Release
 
-QuietShield Chrome is a Manifest V3 browser-protection extension using the same QuietShield identity and shared licensing backend as the other QuietShield clients.
+QuietShield is a Manifest V3 Chrome extension for local ad, tracker, popup, redirect, nuisance and tracking-parameter protection.
 
-## What changed in R6
+## Final protection engine
 
-R6 is a functional blocker upgrade, not only a GUI revision. The earlier starter rules were too narrow for dedicated adblock test pages and the popup could display zeros even when page-level protection had acted. R6 addresses both problems.
+R7 ships five packaged DNR rulesets with 114 validated rules total:
 
-- Broader packaged ad-network and tracker-domain coverage.
-- Common third-party ad-path filtering for ad servers, ad scripts, prebid/VAST resources and WordPress ad plugins.
-- CanYouBlockIt same-origin test-ad filtering while keeping its test pages navigable.
-- Immediate `document_start` cosmetic filtering for high-confidence ad elements such as `.ad-widget`.
-- Interstitial/ad-overlay cleanup and stronger pop-under suppression.
-- Real popup quick switches for Ad, Tracker, Threat, Popup and Redirect protection.
-- Correct fallback to the latest normal web tab when the popup is opened while the QuietShield dashboard is active.
-- Improved per-page counters for network blocks, cosmetic ad hides, popups and URL cleanups.
-- Refined dashboard and popup visuals with refreshed QuietShield toolbar icons.
-- Hidden licensing endpoint remains internal; administrator credentials remain outside the package.
+- Ads: 83 rules, including major advertising/native recommendation networks and high-confidence same-origin ad asset paths.
+- Trackers: 18 rules.
+- Threat/mining: 1 consolidated domain rule.
+- Redirect/popunder networks: 11 rules.
+- Optional HTTP-to-HTTPS upgrade: 1 rule.
 
-## Protection architecture
+The page layer adds synchronous detector-bait hiding, cosmetic ad removal, native/sponsored-card detection, interstitial cleanup, anti-adblock overlay cleanup, popup protection, push-notification suppression and URL tracking cleanup.
 
-QuietShield uses five packaged MV3 rulesets: ads, trackers, threats/mining, redirect networks and optional HTTPS upgrades. The visible protection switches enable or disable real filtering behavior.
+## Native-ad test note
 
-Page-level protection includes cosmetic filtering, URL tracking cleanup, popup/pop-under guards and annoyance cleanup. Trusted sites bypass QuietShield page protection after the stored site policy loads.
+Some adblock test pages show a static screenshot labelled as an example of a native ad. An illustration is ordinary editorial page content and is not itself an advertising network request. QuietShield deliberately avoids deleting editorial examples merely because they look like an ad. Use the site's actual detector/live ad slots, banner tests, popup tests and QuietShield's own Engine Self-Test to verify blocking.
 
-## CanYouBlockIt behavior
+## Built-in Engine Self-Test
 
-CanYouBlockIt deliberately uses both third-party and self-hosted advertisements. R6 adds browser-level blocking plus page-level cosmetic rules for its detector bait and interstitial test elements. QuietShield does not expose a unique webpage-visible "QuietShield installed" marker; the test should detect it as an ad blocker because ad elements are actually blocked/hidden.
+Open QuietShield Dashboard -> Protection -> Protection Engine Self-Test -> Run self-test.
 
-## Privacy
-
-Network Inspector details remain in service-worker memory. Aggregate protection counters and site policies are stored locally. QuietShield does not upload browsing history to the licensing service.
-
-## Licensing
-
-The service address is internal routing configuration and is not shown in the UI. Administrator keys are never hard-coded. Administrator activation uses a device-bound RSA keypair and does not retain the administrator activation key after successful activation.
-
-Deploy the matching existing-server Code372 Chrome authorization before testing live Chrome licensing.
+When QuietShield is loaded unpacked, Chrome checks hypothetical requests against the installed DNR engine. R7 tests Google display ads, same-origin ad-insertion assets, native-ad assets, analytics, cryptomining and pop-under networks. All tests should report PASS.
 
 ## Load unpacked
 
-The publisher automatically recreates:
+The full-functional bundle contains a ready folder named `LOAD-UNPACKED`. In Chrome:
+
+1. Open `chrome://extensions`.
+2. Turn on Developer mode.
+3. Click Load unpacked.
+4. Select the `LOAD-UNPACKED` folder itself.
+
+After running the publisher, the same ready runtime is rebuilt at:
 
 `D:\Windows Projects\QuietShield-Chrome\LOAD-UNPACKED`
 
-Select that exact folder in `chrome://extensions` -> Developer mode -> Load unpacked.
+## Durable publisher
 
-## Windows publisher
+Run `START-PUBLISH-QUIETSHIELD-CHROME-R7.bat` normally, not as Administrator. PowerShell 7 is required.
 
-Run normally, not as Administrator:
+The publisher creates a persistent log before mutation and never relaunches a second BAT. On systems with drive D:, logs are written to:
 
-`START-PUBLISH-QUIETSHIELD-CHROME-R6.bat`
+`D:\QuietShield-Chrome-Logs`
 
-Requirements:
-- PowerShell 7
-- Git for Windows
-- Existing GitHub authentication
+The most recent run is copied to:
 
-## R6 publisher reliability
+`D:\QuietShield-Chrome-Logs\LATEST.log`
 
-Run `START-PUBLISH-QUIETSHIELD-CHROME-R6.bat` normally. The launcher now always keeps its window open and always creates a persistent log before publisher work begins. On systems with drive D:, logs are written to `D:\QuietShield-Chrome-Logs`; otherwise they are written under `%LOCALAPPDATA%\QuietShield\Chrome\Logs`. The newest complete run is mirrored as `LATEST.log`.
+If D: is unavailable, logs fall back to `%LOCALAPPDATA%\QuietShield\Chrome\Logs`.
 
-R6 no longer relaunches a second BAT after installing to `D:\Windows Projects\QuietShield-Chrome`; the original PowerShell process continues against the canonical project so nested-window crashes and lost output are eliminated.
+## Licensing
+
+QuietShield Chrome uses the existing QuietShield licensing service. The customer-facing UI does not show or edit the service URL. Customer and administrator keys are entered through the License page. No server signing key, Payhip secret or administrator key is bundled in the extension.
+
+The matching shared server remains QuietShield License Server 1.2.6 Code372 with Chrome package authorization for `quietshield.chrome`.
+
+## Scope
+
+QuietShield can block a large class of network and cosmetic ads under Chrome Manifest V3, but no browser extension can truthfully guarantee permanent blocking of every first-party advertisement on every site. The release avoids making that claim.

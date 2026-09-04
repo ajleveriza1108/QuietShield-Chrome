@@ -11,36 +11,52 @@
         "33across.com",
         "360yield.com",
         "adcolony.com",
-        "adform.net",
         "adform.com",
+        "adform.net",
+        "adition.com",
         "adkernel.com",
+        "adlightning.com",
+        "admanmedia.com",
+        "admixer.net",
+        "admost.com",
         "adnxs.com",
+        "adpushup.com",
         "adroll.com",
         "adsafeprotected.com",
         "adscale.de",
         "adservice.google.com",
+        "adskeeper.co.uk",
+        "adskeeper.com",
+        "adspirit.de",
         "adsrvr.org",
         "adsterra.com",
+        "adtargeting.com",
         "adtech.de",
         "adtelligent.com",
-        "adzerk.net",
+        "adthrive.com",
+        "adverline.com",
         "advertising.com",
+        "adzerk.net",
         "amazon-adsystem.com",
         "applovin.com",
         "appnexus.com",
+        "bidr.io",
         "bidswitch.net",
         "casalemedia.com",
         "chartboost.com",
-        "clickaine.com",
-        "clickadu.com",
         "clickadilla.com",
+        "clickadu.com",
+        "clickaine.com",
         "contextweb.com",
         "conversantmedia.com",
         "criteo.com",
         "criteo.net",
-        "doubleclick.net",
+        "districtm.io",
         "dotomi.com",
+        "doubleclick.net",
         "exoclick.com",
+        "ezoic.net",
+        "freestar.com",
         "fyber.com",
         "googleadservices.com",
         "googlesyndication.com",
@@ -54,12 +70,20 @@
         "juicyads.com",
         "lijit.com",
         "media.net",
+        "mediavine.com",
         "mgid.com",
         "moatads.com",
+        "monetizemore.com",
         "mopub.com",
+        "nativeads.com",
+        "nativo.com",
+        "ntv.io",
         "ogury.com",
+        "openx.com",
         "openx.net",
         "outbrain.com",
+        "playwire.com",
+        "primis.tech",
         "pubmatic.com",
         "revcontent.com",
         "richads.com",
@@ -67,17 +91,24 @@
         "sharethrough.com",
         "smaato.net",
         "smartadserver.com",
+        "sovrn.com",
         "spotxchange.com",
+        "springserve.com",
         "startappservice.com",
         "taboola.com",
         "tapjoy.com",
         "teads.tv",
         "trafficjunky.com",
+        "triplelift.com",
         "undertone.com",
         "unityads.unity3d.com",
         "valueclickmedia.com",
         "vungle.com",
+        "yieldbird.com",
+        "yieldbird.net",
         "yieldlab.net",
+        "yieldlove-ad-serving.net",
+        "yieldlove.com",
         "yieldmo.com",
         "zedo.com"
       ],
@@ -1392,6 +1423,355 @@
         "sub_frame",
         "other",
         "media"
+      ]
+    }
+  },
+  {
+    "id": 1090,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/wp-content/plugins/advanced-ads/",
+      "resourceTypes": [
+        "script",
+        "stylesheet",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1091,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/wp-content/plugins/ad-inserter/",
+      "resourceTypes": [
+        "script",
+        "stylesheet",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1092,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/wp-content/plugins/ads-pro-plugin/",
+      "resourceTypes": [
+        "script",
+        "stylesheet",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1093,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/wp-content/plugins/quick-adsense-reloaded/",
+      "resourceTypes": [
+        "script",
+        "stylesheet",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1094,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/wp-content/plugins/insert-post-ads/",
+      "resourceTypes": [
+        "script",
+        "stylesheet",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1095,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/wp-content/uploads/ads/",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1096,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/wp-content/uploads/advertisements/",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1097,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/adsbygoogle.js",
+      "resourceTypes": [
+        "script"
+      ]
+    }
+  },
+  {
+    "id": 1098,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/pagead/",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame",
+        "ping"
+      ]
+    }
+  },
+  {
+    "id": 1099,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/prebid.js",
+      "resourceTypes": [
+        "script"
+      ]
+    }
+  },
+  {
+    "id": 1100,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/prebid.min.js",
+      "resourceTypes": [
+        "script"
+      ]
+    }
+  },
+  {
+    "id": 1101,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/gpt.js",
+      "resourceTypes": [
+        "script"
+      ]
+    }
+  },
+  {
+    "id": 1102,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/native-ads/",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1103,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/native_ads/",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1104,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/nativeads/",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1105,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/recommendation-widget/",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1106,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/recommended-content/",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1107,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/promoted-content/",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1108,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/sponsored-content/",
+      "resourceTypes": [
+        "script",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1109,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/ad-inserter/",
+      "resourceTypes": [
+        "script",
+        "stylesheet",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1110,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/adrotate/",
+      "resourceTypes": [
+        "script",
+        "stylesheet",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 1111,
+    "priority": 14,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "/ad-rotate/",
+      "resourceTypes": [
+        "script",
+        "stylesheet",
+        "image",
+        "xmlhttprequest",
+        "sub_frame"
       ]
     }
   }
