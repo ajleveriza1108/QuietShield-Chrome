@@ -1,10 +1,10 @@
-# QuietShield Chrome 1.0.4 R5 acceptance plan
+# QuietShield Chrome 1.0.5 R6 acceptance plan
 
-R5 is not considered complete merely because the dashboard opens.
+R6 is not considered complete merely because the dashboard opens.
 
 ## Chrome load
 
-1. Run `START-PUBLISH-QUIETSHIELD-CHROME-R5.bat` normally, not as Administrator.
+1. Run `START-PUBLISH-QUIETSHIELD-CHROME-R6.bat` normally, not as Administrator.
 2. Select `D:\Windows Projects\QuietShield-Chrome\LOAD-UNPACKED` in `chrome://extensions`.
 3. Confirm there are no Manifest/DNR/service-worker errors.
 
@@ -39,3 +39,13 @@ R5 is not considered complete merely because the dashboard opens.
 ## Licensing
 
 Live Chrome activation requires the existing QuietShield Apps Script deployment to be updated to Code372 so `quietshield.chrome` is authorized. Test customer key, trial, administrator key, refresh, list devices and remove device after server deployment.
+
+
+## R6 publisher logging test
+
+1. Run the R6 BAT normally.
+2. Confirm the log path is printed before preflight.
+3. Confirm `LATEST.log` exists after the run.
+4. Confirm the window remains open after success.
+5. Temporarily break a harmless preflight condition in a disposable copy and confirm the failure remains visible and appears in the log.
+6. Confirm only one publisher BAT process is used; canonical installation must not relaunch another BAT.

@@ -1,10 +1,10 @@
-# QuietShield Chrome 1.0.4 R5
+# QuietShield Chrome 1.0.5 R6
 
 QuietShield Chrome is a Manifest V3 browser-protection extension using the same QuietShield identity and shared licensing backend as the other QuietShield clients.
 
-## What changed in R5
+## What changed in R6
 
-R5 is a functional blocker upgrade, not only a GUI revision. The earlier starter rules were too narrow for dedicated adblock test pages and the popup could display zeros even when page-level protection had acted. R5 addresses both problems.
+R6 is a functional blocker upgrade, not only a GUI revision. The earlier starter rules were too narrow for dedicated adblock test pages and the popup could display zeros even when page-level protection had acted. R6 addresses both problems.
 
 - Broader packaged ad-network and tracker-domain coverage.
 - Common third-party ad-path filtering for ad servers, ad scripts, prebid/VAST resources and WordPress ad plugins.
@@ -25,7 +25,7 @@ Page-level protection includes cosmetic filtering, URL tracking cleanup, popup/p
 
 ## CanYouBlockIt behavior
 
-CanYouBlockIt deliberately uses both third-party and self-hosted advertisements. R5 adds browser-level blocking plus page-level cosmetic rules for its detector bait and interstitial test elements. QuietShield does not expose a unique webpage-visible "QuietShield installed" marker; the test should detect it as an ad blocker because ad elements are actually blocked/hidden.
+CanYouBlockIt deliberately uses both third-party and self-hosted advertisements. R6 adds browser-level blocking plus page-level cosmetic rules for its detector bait and interstitial test elements. QuietShield does not expose a unique webpage-visible "QuietShield installed" marker; the test should detect it as an ad blocker because ad elements are actually blocked/hidden.
 
 ## Privacy
 
@@ -49,9 +49,15 @@ Select that exact folder in `chrome://extensions` -> Developer mode -> Load unpa
 
 Run normally, not as Administrator:
 
-`START-PUBLISH-QUIETSHIELD-CHROME-R5.bat`
+`START-PUBLISH-QUIETSHIELD-CHROME-R6.bat`
 
 Requirements:
 - PowerShell 7
 - Git for Windows
 - Existing GitHub authentication
+
+## R6 publisher reliability
+
+Run `START-PUBLISH-QUIETSHIELD-CHROME-R6.bat` normally. The launcher now always keeps its window open and always creates a persistent log before publisher work begins. On systems with drive D:, logs are written to `D:\QuietShield-Chrome-Logs`; otherwise they are written under `%LOCALAPPDATA%\QuietShield\Chrome\Logs`. The newest complete run is mirrored as `LATEST.log`.
+
+R6 no longer relaunches a second BAT after installing to `D:\Windows Projects\QuietShield-Chrome`; the original PowerShell process continues against the canonical project so nested-window crashes and lost output are eliminated.

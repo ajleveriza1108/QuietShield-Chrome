@@ -1,6 +1,6 @@
-# QuietShield Chrome 1.0.4 R5 validation
+# QuietShield Chrome 1.0.5 R6 validation
 
-Validation performed on the final R5 source tree before packaging.
+Validation performed on the final R6 source tree before packaging.
 
 ## Functional changes validated
 
@@ -29,18 +29,18 @@ Validation performed on the final R5 source tree before packaging.
 
 ## Static package validation
 
-- Manifest parses as JSON, `manifest_version = 3`, version `1.0.4`.
+- Manifest parses as JSON, `manifest_version = 3`, version `1.0.5`.
 - All manifest-referenced background, popup, options, content JS/CSS and DNR resources exist.
 - All 8 JavaScript runtime files pass `node --check`.
 - Popup and options JavaScript element-ID references resolve to real HTML elements.
 - Runtime remote executable-code scan passes: no remote script/import/worker, `eval`, or `new Function`.
 - The Apps Script deployment route appears only in `src/background/licensing.js`.
 - No administrator key, Payhip secret, receipt private key, PEM or server signing key is packaged.
-- Chromium 144 `--pack-extension` validation completed with exit code 0 on the final R5 tree.
+- Chromium 144 `--pack-extension` validation completed with exit code 0 on the final R6 tree.
 - Temporary Chromium-generated CRX/PEM validation artifacts were deleted immediately and are not shipped.
 
 ## Environment limitation
 
-The build container does not have Windows PowerShell 7 installed, so the Windows PowerShell parser/runtime was not executed here. The R5 BAT performs PowerShell 7 parser validation before it modifies the canonical project on the user's Windows machine.
+The build container does not have Windows PowerShell 7 installed, so the Windows PowerShell parser/runtime was not executed here. The R6 BAT performs PowerShell 7 parser validation before it modifies the canonical project on the user's Windows machine.
 
-The build environment could not complete a live external CanYouBlockIt browser session. R5 therefore includes explicit regression gates for its documented `.ad-widget` detector behavior, same-origin test-ad rules, popup guard and interstitial cleanup; the final live-site check remains a user-browser acceptance test.
+The build environment could not complete a live external CanYouBlockIt browser session. R6 therefore includes explicit regression gates for its documented `.ad-widget` detector behavior, same-origin test-ad rules, popup guard and interstitial cleanup; the final live-site check remains a user-browser acceptance test.

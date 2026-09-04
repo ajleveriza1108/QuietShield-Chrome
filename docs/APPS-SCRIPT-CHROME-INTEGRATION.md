@@ -4,7 +4,7 @@ QuietShield Chrome must use the existing QuietShield Apps Script project, existi
 
 ## Matching server source
 
-Deploy `QuietShield_License_Server_v1.2.6_Code372_Chrome.gs`, supplied with the R5 full-functional bundle. Code372 itself is unchanged by the R5 DNR client fix.
+Deploy `QuietShield_License_Server_v1.2.6_Code372_Chrome.gs`, supplied with the R6 full-functional bundle. Code372 itself is unchanged by the R6 DNR client fix.
 
 Code372 is a cumulative update of the existing v1.2.5 Code371 server. It preserves Android, Google Play billing, family/admin functions, key registry, trial records and signed receipts. Its Chrome-specific changes are intentionally narrow:
 
@@ -27,10 +27,10 @@ Code372 is a cumulative update of the existing v1.2.5 Code371 server. It preserv
 
 ## Administrator activation
 
-The existing server requires `adminPublicKey` when an administrator key is activated. R5 generates a 2048-bit RSA device keypair locally and sends only the public SPKI material. The administrator activation key is never bundled and is removed from Chrome storage after a successful admin activation.
+The existing server requires `adminPublicKey` when an administrator key is activated. R6 generates a 2048-bit RSA device keypair locally and sends only the public SPKI material. The administrator activation key is never bundled and is removed from Chrome storage after a successful admin activation.
 
 ## Expected failures before deployment
 
 - `PACKAGE_NOT_AUTHORIZED`: the old server is still deployed.
 - `SERVER_SETUP_REQUIRED`: Code372 is saved/deployed but `setupQuietShieldLicenseSystem()` has not yet been run for the new build marker.
-- `ADMIN_DEVICE_KEY_REQUIRED`: an older Chrome client is being used; R5 supplies the required device public key.
+- `ADMIN_DEVICE_KEY_REQUIRED`: an older Chrome client is being used; R6 supplies the required device public key.

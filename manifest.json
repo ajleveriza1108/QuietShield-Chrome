@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "QuietShield",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "QuietShield blocks ads and trackers, cleans page annoyances, and gives per-site privacy controls.",
   "minimum_chrome_version": "120",
   "permissions": [

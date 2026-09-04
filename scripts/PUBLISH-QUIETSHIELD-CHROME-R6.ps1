@@ -3,15 +3,16 @@
 param(
     [string]$CanonicalRoot = 'D:\Windows Projects\QuietShield-Chrome',
     [string]$SourceRepo = 'https://github.com/ajleveriza1108/QuietShield-Chrome.git',
-    [string]$ReleaseRepo = 'https://github.com/ajleveriza1108/QuietShield-Chrome-Release.git'
+    [string]$ReleaseRepo = 'https://github.com/ajleveriza1108/QuietShield-Chrome-Release.git',
+    [string]$LogPath = ''
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$Version = '1.0.4'
-$Revision = 'R5'
-$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R5.bat'
+$Version = '1.0.5'
+$Revision = 'R6'
+$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R6.bat'
 $PackageName = "QuietShield-Chrome-$Version-$Revision.zip"
 
 function Write-Step([string]$Text) {
@@ -127,12 +128,37 @@ function New-LoadUnpackedFolder {
     }
 
     if ([int]$readyManifestJson.manifest_version -ne 3 -or [string]$readyManifestJson.version -ne $Version) {
-        Fail 'LOAD-UNPACKED manifest identity does not match the validated R5 runtime.'
+        Fail 'LOAD-UNPACKED manifest identity does not match the validated R6 runtime.'
     }
 
     Write-Host "[PASS] Chrome Load Unpacked folder ready: $target" -ForegroundColor Green
     return $target
 }
+
+# Durable publisher logging. The BAT supplies a log path, but direct PS1 runs
+# also get a persistent external log. Logs are intentionally outside the
+# canonical project so clean installation cannot delete them.
+if ([string]::IsNullOrWhiteSpace($LogPath)) {
+    $preferredLogRoot = 'D:\QuietShield-Chrome-Logs'
+    if (-not (Test-Path -LiteralPath 'D:\' -PathType Container)) {
+        $preferredLogRoot = Join-Path $env:LOCALAPPDATA 'QuietShield\Chrome\Logs'
+    }
+    New-Item -ItemType Directory -Path $preferredLogRoot -Force | Out-Null
+    $LogPath = Join-Path $preferredLogRoot ("QuietShield-Chrome-$Version-$Revision-" + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.log')
+} else {
+    $logParent = Split-Path -Parent $LogPath
+    if ($logParent -and -not (Test-Path -LiteralPath $logParent -PathType Container)) {
+        New-Item -ItemType Directory -Path $logParent -Force | Out-Null
+    }
+}
+
+$script:PublisherExitCode = 0
+$script:TranscriptStarted = $false
+
+try {
+    Start-Transcript -LiteralPath $LogPath -Append -Force | Out-Null
+    $script:TranscriptStarted = $true
+    Write-Host "[LOG] Persistent publisher log: $LogPath" -ForegroundColor Cyan
 
 Write-Host '============================================================'
 Write-Host "QuietShield Chrome $Version $Revision - CLEAN BUILD + TWO-REPO PUBLISHER"
@@ -205,8 +231,7 @@ if ($scriptRoot -ine $canonicalFull) {
     }
 
     Write-Host '[PASS] Clean canonical installation completed.' -ForegroundColor Green
-    & $installedLauncher
-    exit $LASTEXITCODE
+    Write-Host '[INFO] Continuing in the same PowerShell process; no nested BAT relaunch is used.' -ForegroundColor Cyan
 }
 
 Set-Location -LiteralPath $CanonicalRoot
@@ -365,14 +390,14 @@ Write-Host '[PASS] Manifest V3 validation passed.' -ForegroundColor Green
 Write-Host '[PASS] Runtime remote-code scan passed.' -ForegroundColor Green
 Write-Host '[PASS] DNR ruleset validation passed.' -ForegroundColor Green
 
-# R5 release contracts: no customer-facing developer endpoint override, no
+# R6 release contracts: no customer-facing developer endpoint override, no
 # hardcoded administrator credential, and the built-in service endpoint must
 # live only in the background licensing client.
 $runtimeTextFiles = @($jsFiles + $htmlFiles)
 Assert-TextPatternAbsent `
     -Files $runtimeTextFiles `
     -Pattern '(?i)Developer Configuration|QS_SET_LICENSE_ENDPOINT|endpoint override|Use built-in endpoint' `
-    -FailureLabel 'Customer-facing developer endpoint configuration was found in R5.'
+    -FailureLabel 'Customer-facing developer endpoint configuration was found in R6.'
 
 Assert-TextPatternAbsent `
     -Files $runtimeTextFiles `
@@ -390,10 +415,10 @@ if ($endpointHits.Count -ne 1 -or $endpointHits[0].Path -notlike '*\src\backgrou
 $packageBat = @(Get-ChildItem -LiteralPath $CanonicalRoot -File -Filter '*.bat')
 $packagePs1 = @(Get-ChildItem -LiteralPath (Join-Path $CanonicalRoot 'scripts') -File -Filter '*.ps1')
 if ($packageBat.Count -ne 1 -or $packagePs1.Count -ne 1) {
-    Fail 'R5 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
+    Fail 'R6 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
 }
 
-# R5 functional blocker regression contracts. These are deliberately source-level
+# R6 functional blocker regression contracts. These are deliberately source-level
 # gates so a later package cannot silently ship the old detector/counter failures.
 $bootstrapCssPath = Join-Path $CanonicalRoot 'src\content\bootstrap.css'
 $contentJsPath = Join-Path $CanonicalRoot 'src\content\content.js'
@@ -407,14 +432,14 @@ $pageGuardJs = Get-Content -LiteralPath $pageGuardPath -Raw
 $popupJs = Get-Content -LiteralPath $popupJsPath -Raw
 $adsRulesText = Get-Content -LiteralPath $adsRulesPath -Raw
 
-if ($bootstrapCss -notmatch '\.ad-widget') { Fail 'R5 detector contract missing: bootstrap.css must synchronously hide .ad-widget.' }
-if ($contentJs -notmatch 'semantic-ad-overlay' -or $contentJs -notmatch 'data-qs-bypass') { Fail 'R5 cosmetic/interstitial regression contract is missing.' }
-if ($pageGuardJs -notmatch 'canyoublockit\.com' -or $pageGuardJs -notmatch 'Notification\.requestPermission') { Fail 'R5 popup/push protection regression contract is missing.' }
-if ($popupJs -notmatch 'resolveTargetTab' -or $popupJs -notmatch 'lastAccessed' -or $popupJs -notmatch 'lock-tile') { Fail 'R5 popup web-tab fallback or quick-lock controls are missing.' }
-if ($adsRulesText -notmatch 'canyoublockit\.com' -or $adsRulesText -notmatch '"domainType"\s*:\s*"thirdParty"') { Fail 'R5 ad-path or CanYouBlockIt DNR coverage is missing.' }
+if ($bootstrapCss -notmatch '\.ad-widget') { Fail 'R6 detector contract missing: bootstrap.css must synchronously hide .ad-widget.' }
+if ($contentJs -notmatch 'semantic-ad-overlay' -or $contentJs -notmatch 'data-qs-bypass') { Fail 'R6 cosmetic/interstitial regression contract is missing.' }
+if ($pageGuardJs -notmatch 'canyoublockit\.com' -or $pageGuardJs -notmatch 'Notification\.requestPermission') { Fail 'R6 popup/push protection regression contract is missing.' }
+if ($popupJs -notmatch 'resolveTargetTab' -or $popupJs -notmatch 'lastAccessed' -or $popupJs -notmatch 'lock-tile') { Fail 'R6 popup web-tab fallback or quick-lock controls are missing.' }
+if ($adsRulesText -notmatch 'canyoublockit\.com' -or $adsRulesText -notmatch '"domainType"\s*:\s*"thirdParty"') { Fail 'R6 ad-path or CanYouBlockIt DNR coverage is missing.' }
 
-Write-Host '[PASS] R5 functional blocker regression contracts passed.' -ForegroundColor Green
-Write-Host '[PASS] R5 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
+Write-Host '[PASS] R6 functional blocker regression contracts passed.' -ForegroundColor Green
+Write-Host '[PASS] R6 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
 
 Write-Step 'Create Chrome Load Unpacked folder'
 $loadUnpackedPath = New-LoadUnpackedFolder -ProjectRoot $CanonicalRoot
@@ -565,3 +590,46 @@ Write-Host "[PASS] Package: $zipPath" -ForegroundColor Green
 Write-Host "[PASS] Chrome Load Unpacked folder: $loadUnpackedPath" -ForegroundColor Green
 Write-Host '[INFO] In Chrome: chrome://extensions -> Developer mode -> Load unpacked -> select the LOAD-UNPACKED folder above.' -ForegroundColor Cyan
 Write-Host "[PASS] SHA-256: $hash" -ForegroundColor Green
+
+
+}
+catch {
+    $script:PublisherExitCode = 1
+    Write-Host ''
+    Write-Host '============================================================' -ForegroundColor Red
+    Write-Host '[FAIL] QUIETSHIELD CHROME PUBLISHER STOPPED' -ForegroundColor Red
+    Write-Host '============================================================' -ForegroundColor Red
+    Write-Host ("[ERROR] " + $_.Exception.Message) -ForegroundColor Red
+
+    if ($_.InvocationInfo -and $_.InvocationInfo.PositionMessage) {
+        Write-Host $_.InvocationInfo.PositionMessage -ForegroundColor DarkRed
+    }
+    if ($_.ScriptStackTrace) {
+        Write-Host '[STACK]' -ForegroundColor DarkRed
+        Write-Host $_.ScriptStackTrace -ForegroundColor DarkRed
+    }
+}
+finally {
+    if ($script:TranscriptStarted) {
+        try { Stop-Transcript | Out-Null } catch { }
+    }
+
+    try {
+        if (Test-Path -LiteralPath $LogPath -PathType Leaf) {
+            $latestPath = Join-Path (Split-Path -Parent $LogPath) 'LATEST.log'
+            Copy-Item -LiteralPath $LogPath -Destination $latestPath -Force
+        }
+    } catch { }
+
+    Write-Host ''
+    Write-Host '============================================================'
+    if ($script:PublisherExitCode -eq 0) {
+        Write-Host '[PASS] Publisher finished successfully.' -ForegroundColor Green
+    } else {
+        Write-Host '[FAIL] Publisher finished with an error.' -ForegroundColor Red
+    }
+    Write-Host "[LOG] $LogPath" -ForegroundColor Cyan
+    Write-Host '============================================================'
+}
+
+exit $script:PublisherExitCode

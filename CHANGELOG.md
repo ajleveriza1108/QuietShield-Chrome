@@ -1,6 +1,19 @@
+# QuietShield Chrome Changelog
+
+## 1.0.5 R6 — Durable publisher / no disappearing window
+
+- Removed the recursive BAT relaunch after canonical installation. The same PowerShell process now continues against the clean canonical project.
+- Added a persistent publisher transcript from the first runtime step through completion or failure.
+- BAT preflight failures are also written to the same external log.
+- Logs are stored outside the clean project at `D:\QuietShield-Chrome-Logs` when drive D: is available, otherwise under `%LOCALAPPDATA%\QuietShield\Chrome\Logs`.
+- `LATEST.log` is always refreshed for quick recovery.
+- The BAT window now pauses on both success and failure so output cannot disappear.
+- Exceptions print the exact message, PowerShell position, and script stack trace before exit.
+- R5 functional blocker, GUI, DNR, licensing, and LOAD-UNPACKED behavior are retained.
+
 # Changelog
 
-## 1.0.4 R5
+## 1.0.5 R6
 
 - Expanded QuietShield from a starter blocker into a broader ad/tracker blocker with substantially larger packaged network-domain coverage.
 - Added EasyList-style third-party ad-path blocking for common ad servers, WordPress ad plugins, prebid/VAST assets, popunders and interstitial loaders.
