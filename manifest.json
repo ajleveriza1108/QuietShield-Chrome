@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "QuietShield",
-  "version": "1.0.6",
-  "description": "QuietShield blocks ads, trackers, native ad widgets, popups and redirect networks with local Manifest V3 protection.",
+  "version": "1.0.9",
+  "description": "QuietShield blocks ads, trackers, popups and redirect networks with compatibility-safe local Manifest V3 protection.",
   "minimum_chrome_version": "120",
   "permissions": [
     "storage",

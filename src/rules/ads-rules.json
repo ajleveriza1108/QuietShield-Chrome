@@ -71,6 +71,7 @@
         "lijit.com",
         "media.net",
         "mediavine.com",
+        "megapopads.com",
         "mgid.com",
         "moatads.com",
         "monetizemore.com",
@@ -78,13 +79,20 @@
         "nativeads.com",
         "nativo.com",
         "ntv.io",
+        "offpageads.com",
         "ogury.com",
         "openx.com",
         "openx.net",
         "outbrain.com",
         "playwire.com",
+        "popads.net",
+        "popcash.net",
+        "popcashjs.b-cdn.net",
+        "poweradcash.net",
         "primis.tech",
+        "propellerads.com",
         "pubmatic.com",
+        "pushground.com",
         "revcontent.com",
         "richads.com",
         "rubiconproject.com",
@@ -104,6 +112,7 @@
         "unityads.unity3d.com",
         "valueclickmedia.com",
         "vungle.com",
+        "ybs2ft75v.com",
         "yieldbird.com",
         "yieldbird.net",
         "yieldlab.net",
@@ -1177,256 +1186,6 @@
     }
   },
   {
-    "id": 1080,
-    "priority": 95,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "/ads/",
-      "initiatorDomains": [
-        "canyoublockit.com"
-      ],
-      "requestDomains": [
-        "canyoublockit.com"
-      ],
-      "resourceTypes": [
-        "script",
-        "image",
-        "stylesheet",
-        "xmlhttprequest",
-        "sub_frame",
-        "other",
-        "media"
-      ]
-    }
-  },
-  {
-    "id": 1081,
-    "priority": 95,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "/advert",
-      "initiatorDomains": [
-        "canyoublockit.com"
-      ],
-      "requestDomains": [
-        "canyoublockit.com"
-      ],
-      "resourceTypes": [
-        "script",
-        "image",
-        "stylesheet",
-        "xmlhttprequest",
-        "sub_frame",
-        "other",
-        "media"
-      ]
-    }
-  },
-  {
-    "id": 1082,
-    "priority": 95,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "/banner",
-      "initiatorDomains": [
-        "canyoublockit.com"
-      ],
-      "requestDomains": [
-        "canyoublockit.com"
-      ],
-      "resourceTypes": [
-        "script",
-        "image",
-        "stylesheet",
-        "xmlhttprequest",
-        "sub_frame",
-        "other",
-        "media"
-      ]
-    }
-  },
-  {
-    "id": 1083,
-    "priority": 95,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "/interstitial",
-      "initiatorDomains": [
-        "canyoublockit.com"
-      ],
-      "requestDomains": [
-        "canyoublockit.com"
-      ],
-      "resourceTypes": [
-        "script",
-        "image",
-        "stylesheet",
-        "xmlhttprequest",
-        "sub_frame",
-        "other",
-        "media"
-      ]
-    }
-  },
-  {
-    "id": 1084,
-    "priority": 95,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "/popup",
-      "initiatorDomains": [
-        "canyoublockit.com"
-      ],
-      "requestDomains": [
-        "canyoublockit.com"
-      ],
-      "resourceTypes": [
-        "script",
-        "image",
-        "stylesheet",
-        "xmlhttprequest",
-        "sub_frame",
-        "other",
-        "media"
-      ]
-    }
-  },
-  {
-    "id": 1085,
-    "priority": 95,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "/popunder",
-      "initiatorDomains": [
-        "canyoublockit.com"
-      ],
-      "requestDomains": [
-        "canyoublockit.com"
-      ],
-      "resourceTypes": [
-        "script",
-        "image",
-        "stylesheet",
-        "xmlhttprequest",
-        "sub_frame",
-        "other",
-        "media"
-      ]
-    }
-  },
-  {
-    "id": 1086,
-    "priority": 95,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "/sponsor",
-      "initiatorDomains": [
-        "canyoublockit.com"
-      ],
-      "requestDomains": [
-        "canyoublockit.com"
-      ],
-      "resourceTypes": [
-        "script",
-        "image",
-        "stylesheet",
-        "xmlhttprequest",
-        "sub_frame",
-        "other",
-        "media"
-      ]
-    }
-  },
-  {
-    "id": 1087,
-    "priority": 95,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "/adblock-notify",
-      "initiatorDomains": [
-        "canyoublockit.com"
-      ],
-      "requestDomains": [
-        "canyoublockit.com"
-      ],
-      "resourceTypes": [
-        "script",
-        "image",
-        "stylesheet",
-        "xmlhttprequest",
-        "sub_frame",
-        "other",
-        "media"
-      ]
-    }
-  },
-  {
-    "id": 1088,
-    "priority": 95,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "/advanced-ads",
-      "initiatorDomains": [
-        "canyoublockit.com"
-      ],
-      "requestDomains": [
-        "canyoublockit.com"
-      ],
-      "resourceTypes": [
-        "script",
-        "image",
-        "stylesheet",
-        "xmlhttprequest",
-        "sub_frame",
-        "other",
-        "media"
-      ]
-    }
-  },
-  {
-    "id": 1089,
-    "priority": 95,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "/adsense",
-      "initiatorDomains": [
-        "canyoublockit.com"
-      ],
-      "requestDomains": [
-        "canyoublockit.com"
-      ],
-      "resourceTypes": [
-        "script",
-        "image",
-        "stylesheet",
-        "xmlhttprequest",
-        "sub_frame",
-        "other",
-        "media"
-      ]
-    }
-  },
-  {
     "id": 1090,
     "priority": 14,
     "action": {
@@ -1440,7 +1199,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1457,7 +1217,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1474,7 +1235,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1491,7 +1253,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1508,7 +1271,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1524,7 +1288,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1540,7 +1305,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1553,7 +1319,8 @@
       "urlFilter": "/adsbygoogle.js",
       "resourceTypes": [
         "script"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1570,7 +1337,8 @@
         "xmlhttprequest",
         "sub_frame",
         "ping"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1583,7 +1351,8 @@
       "urlFilter": "/prebid.js",
       "resourceTypes": [
         "script"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1596,7 +1365,8 @@
       "urlFilter": "/prebid.min.js",
       "resourceTypes": [
         "script"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1609,7 +1379,8 @@
       "urlFilter": "/gpt.js",
       "resourceTypes": [
         "script"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1625,7 +1396,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1641,7 +1413,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1657,7 +1430,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1673,7 +1447,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1689,7 +1464,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1705,7 +1481,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1721,7 +1498,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1738,7 +1516,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1755,7 +1534,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   },
   {
@@ -1772,7 +1552,8 @@
         "image",
         "xmlhttprequest",
         "sub_frame"
-      ]
+      ],
+      "domainType": "thirdParty"
     }
   }
 ]

@@ -1,6 +1,6 @@
-# QuietShield Chrome 1.0.6 R7 Final Acceptance Plan
+# QuietShield Chrome 1.0.9 R10 Final Acceptance Plan
 
-1. Run `START-PUBLISH-QUIETSHIELD-CHROME-R7.bat` normally.
+1. Run `START-PUBLISH-QUIETSHIELD-CHROME-R10.bat` normally.
 2. Confirm the BAT remains open and prints the persistent log and `LATEST.log` paths.
 3. In `chrome://extensions`, load `D:\Windows Projects\QuietShield-Chrome\LOAD-UNPACKED`.
 4. Confirm there are no extension Errors.

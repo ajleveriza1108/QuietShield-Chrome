@@ -236,8 +236,8 @@ async function matchedDnrForTab(tabId, minTimeStamp) {
 async function runEngineSelfTest() {
   const tests = [
     { name: 'Google display ad script', url: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', type: 'script', expected: 'qs_ads' },
-    { name: 'Same-origin Advanced Ads asset', url: 'https://example.com/wp-content/plugins/advanced-ads/public/assets/js/advanced.min.js', type: 'script', expected: 'qs_ads' },
-    { name: 'Native ad widget asset', url: 'https://example.com/native-ads/widget.js', type: 'script', expected: 'qs_ads' },
+    { name: 'Third-party Advanced Ads asset', url: 'https://cdn.publisher-example.net/wp-content/plugins/advanced-ads/public/assets/js/advanced.min.js', type: 'script', expected: 'qs_ads' },
+    { name: 'Third-party native ad widget', url: 'https://cdn.publisher-example.net/native-ads/widget.js', type: 'script', expected: 'qs_ads' },
     { name: 'Google Analytics collection', url: 'https://www.google-analytics.com/g/collect?v=2', type: 'xmlhttprequest', expected: 'qs_trackers' },
     { name: 'Cryptomining script', url: 'https://coinhive.com/lib/coinhive.min.js', type: 'script', expected: 'qs_security' },
     { name: 'Pop-under network', url: 'https://popads.net/pop.js', type: 'script', expected: 'qs_redirects' }

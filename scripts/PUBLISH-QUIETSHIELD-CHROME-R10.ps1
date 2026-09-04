@@ -10,9 +10,9 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$Version = '1.0.6'
-$Revision = 'R7'
-$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R7.bat'
+$Version = '1.0.9'
+$Revision = 'R10'
+$LauncherName = 'START-PUBLISH-QUIETSHIELD-CHROME-R10.bat'
 $PackageName = "QuietShield-Chrome-$Version-$Revision.zip"
 
 function Write-Step([string]$Text) {
@@ -128,7 +128,7 @@ function New-LoadUnpackedFolder {
     }
 
     if ([int]$readyManifestJson.manifest_version -ne 3 -or [string]$readyManifestJson.version -ne $Version) {
-        Fail 'LOAD-UNPACKED manifest identity does not match the validated R7 runtime.'
+        Fail 'LOAD-UNPACKED manifest identity does not match the validated R10 runtime.'
     }
 
     Write-Host "[PASS] Chrome Load Unpacked folder ready: $target" -ForegroundColor Green
@@ -203,7 +203,7 @@ if ($scriptRoot -ine $canonicalFull) {
             Where-Object { $ephemeralNames -notcontains $_.Name }
     )
 
-    if ($backupCandidates.Count -gt 0) {
+    if (@($backupCandidates).Count -gt 0) {
         $backupRoot = Join-Path $parent 'QuietShield-Chrome-Backups'
         $backupPath = Join-Path $backupRoot (Get-Date -Format 'yyyyMMdd-HHmmss')
         New-Item -ItemType Directory -Force -Path $backupPath | Out-Null
@@ -390,14 +390,83 @@ Write-Host '[PASS] Manifest V3 validation passed.' -ForegroundColor Green
 Write-Host '[PASS] Runtime remote-code scan passed.' -ForegroundColor Green
 Write-Host '[PASS] DNR ruleset validation passed.' -ForegroundColor Green
 
-# R7 release contracts: no customer-facing developer endpoint override, no
+# R10 compatibility regression gate: public websites must not be damaged by
+# test-site-specific same-origin rules or broad substring cosmetic selectors.
+$rulesText = Get-ChildItem -LiteralPath (Join-Path $CanonicalRoot 'src\rules') -Filter '*.json' -File |
+    ForEach-Object { Get-Content -LiteralPath $_.FullName -Raw }
+if (($rulesText -join "`n") -match '(?i)canyoublockit\.com') {
+    Fail 'R10 forbids test-site-specific DNR rules. Use general ad-network/path rules instead.'
+}
+
+$adsRules = Get-Content -LiteralPath (Join-Path $CanonicalRoot 'src\rules\ads-rules.json') -Raw | ConvertFrom-Json
+foreach ($rule in @($adsRules)) {
+    $conditionProperty = $rule.PSObject.Properties['condition']
+    if ($null -eq $conditionProperty -or $null -eq $conditionProperty.Value) { continue }
+    $condition = $conditionProperty.Value
+
+    # DNR condition members such as urlFilter, requestDomains, and domainType
+    # are optional. Direct member access throws under Set-StrictMode when a
+    # valid rule omits one of them, so inspect PSObject.Properties safely.
+    $urlFilterProperty = $condition.PSObject.Properties['urlFilter']
+    $requestDomainsProperty = $condition.PSObject.Properties['requestDomains']
+    $domainTypeProperty = $condition.PSObject.Properties['domainType']
+
+    $urlFilterValue = if ($null -ne $urlFilterProperty) { [string]$urlFilterProperty.Value } else { '' }
+
+    # Assignment expressions can unwrap a one-item array to a scalar in PowerShell.
+    # Always re-wrap before counting so StrictMode behaves identically for 0/1/N domains.
+    $requestDomainsValue = @()
+    if ($null -ne $requestDomainsProperty -and $null -ne $requestDomainsProperty.Value) {
+        $requestDomainsValue = @($requestDomainsProperty.Value)
+    }
+
+    $domainTypeValue = if ($null -ne $domainTypeProperty) { [string]$domainTypeProperty.Value } else { '' }
+
+    $hasGenericPath = -not [string]::IsNullOrWhiteSpace($urlFilterValue)
+    $hasExplicitDomains = @($requestDomainsValue).Count -gt 0
+    if ($hasGenericPath -and -not $hasExplicitDomains -and $domainTypeValue -ne 'thirdParty') {
+        Fail "R10 compatibility gate: generic URL-path rule $($rule.id) must be thirdParty-only."
+    }
+}
+
+$cosmeticText = (Get-Content -LiteralPath (Join-Path $CanonicalRoot 'src\content\bootstrap.css') -Raw) + "`n" +
+    (Get-Content -LiteralPath (Join-Path $CanonicalRoot 'src\content\content.js') -Raw)
+foreach ($dangerous in @('[class*="advert"]','[id^="ad-"]','labelCandidates','suitableCard(')) {
+    if ($cosmeticText.Contains($dangerous)) {
+        Fail "R10 compatibility gate rejected broad cosmetic heuristic: $dangerous"
+    }
+}
+$publisherGateText = Get-Content -LiteralPath $PSCommandPath -Raw
+if ($publisherGateText -match '\$condition\.(urlFilter|requestDomains|domainType)') {
+    Fail 'R10 StrictMode regression gate rejected direct access to optional DNR condition properties.'
+}
+# R10 publisher-reliability gate: never access .Count directly on values that
+# may be scalar-unwrapped by PowerShell pipeline/JSON assignment semantics.
+$unsafeCountPatterns = @(
+    '\$requestDomainsValue\.Count',
+    '\$backupCandidates\.Count',
+    '\$endpointHits\.Count',
+    '\$packageBat\.Count',
+    '\$packagePs1\.Count',
+    '\$adsRules\.Count'
+)
+foreach ($unsafeCountPattern in $unsafeCountPatterns) {
+    if ($publisherGateText -match $unsafeCountPattern) {
+        Fail "R10 StrictMode regression gate rejected unsafe scalar-sensitive Count access: $unsafeCountPattern"
+    }
+}
+
+Write-Host '[PASS] R10 website-compatibility regression gates passed.' -ForegroundColor Green
+
+
+# R10 release contracts: no customer-facing developer endpoint override, no
 # hardcoded administrator credential, and the built-in service endpoint must
 # live only in the background licensing client.
 $runtimeTextFiles = @($jsFiles + $htmlFiles)
 Assert-TextPatternAbsent `
     -Files $runtimeTextFiles `
     -Pattern '(?i)Developer Configuration|QS_SET_LICENSE_ENDPOINT|endpoint override|Use built-in endpoint' `
-    -FailureLabel 'Customer-facing developer endpoint configuration was found in R7.'
+    -FailureLabel 'Customer-facing developer endpoint configuration was found in R10.'
 
 Assert-TextPatternAbsent `
     -Files $runtimeTextFiles `
@@ -408,17 +477,17 @@ $endpointHits = @(
     Get-ChildItem -LiteralPath $srcRoot -Recurse -File |
         Select-String -Pattern 'script\.google\.com/macros/s/' -ErrorAction SilentlyContinue
 )
-if ($endpointHits.Count -ne 1 -or $endpointHits[0].Path -notlike '*\src\background\licensing.js') {
+if (@($endpointHits).Count -ne 1 -or $endpointHits[0].Path -notlike '*\src\background\licensing.js') {
     Fail 'The built-in Apps Script route must appear exactly once and only in src\background\licensing.js.'
 }
 
 $packageBat = @(Get-ChildItem -LiteralPath $CanonicalRoot -File -Filter '*.bat')
 $packagePs1 = @(Get-ChildItem -LiteralPath (Join-Path $CanonicalRoot 'scripts') -File -Filter '*.ps1')
-if ($packageBat.Count -ne 1 -or $packagePs1.Count -ne 1) {
-    Fail 'R7 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
+if (@($packageBat).Count -ne 1 -or @($packagePs1).Count -ne 1) {
+    Fail 'R10 package contract requires exactly 1 root BAT and exactly 1 publisher PS1.'
 }
 
-# R7 final-release functional regression contracts. These source-level gates
+# R10 final-release functional regression contracts. These source-level gates
 # prevent a future package from silently dropping the blocker fixes validated here.
 $bootstrapCssPath = Join-Path $CanonicalRoot 'src\content\bootstrap.css'
 $contentJsPath = Join-Path $CanonicalRoot 'src\content\content.js'
@@ -439,22 +508,23 @@ $adsRulesText = Get-Content -LiteralPath $adsRulesPath -Raw
 $launcherText = Get-Content -LiteralPath $launcherPath -Raw
 $adsRules = @(Get-Content -LiteralPath $adsRulesPath -Raw | ConvertFrom-Json)
 
-if ($bootstrapCss -notmatch '\.ad-widget') { Fail 'R7 detector contract missing: bootstrap.css must synchronously hide .ad-widget.' }
-if ($bootstrapCss -notmatch '\.native-ad' -or $bootstrapCss -notmatch '\[data-sponsored\]') { Fail 'R7 synchronous native/sponsored cosmetic coverage is missing.' }
-if ($contentJs -notmatch 'semantic-native-ad' -or $contentJs -notmatch 'semantic-sponsored-card') { Fail 'R7 native/sponsored semantic filtering contract is missing.' }
-if ($contentJs -notmatch 'anti-adblock-overlay' -or $contentJs -notmatch 'EDITORIAL_EXAMPLE_RE') { Fail 'R7 anti-adblock/editorial-safety contract is missing.' }
-if ($contentJs -notmatch 'semantic-ad-overlay' -or $contentJs -notmatch 'data-qs-bypass') { Fail 'R7 cosmetic/interstitial regression contract is missing.' }
-if ($pageGuardJs -notmatch 'window\.open' -or $pageGuardJs -notmatch 'HTMLAnchorElement\.prototype\.click' -or $pageGuardJs -notmatch 'Notification\.requestPermission') { Fail 'R7 popup/redirect/push guard contract is missing.' }
-if ($serviceWorkerJs -notmatch 'getMatchedRules' -or $serviceWorkerJs -notmatch 'testMatchOutcome' -or $serviceWorkerJs -notmatch 'QS_ENGINE_SELF_TEST') { Fail 'R7 exact DNR feedback or Engine Self-Test contract is missing.' }
-if ($popupJs -notmatch 'dnrCategories' -or $popupJs -notmatch 'resolveTargetTab' -or $popupJs -notmatch 'lastAccessed') { Fail 'R7 popup DNR category counters or real-web-tab fallback are missing.' }
-if ($optionsHtml -notmatch 'Protection Engine Self-Test' -or $optionsHtml -notmatch 'runEngineSelfTest') { Fail 'R7 dashboard Engine Self-Test controls are missing.' }
-if ($adsRules.Count -lt 80) { Fail "R7 ads ruleset is unexpectedly small: $($adsRules.Count) rules." }
-if ($adsRulesText -notmatch '/wp-content/plugins/advanced-ads/' -or $adsRulesText -notmatch '/native-ads/' -or $adsRulesText -notmatch 'amazon-adsystem\.com') { Fail 'R7 same-origin/native advertising DNR coverage is missing.' }
-if (@($manifest.permissions) -notcontains 'declarativeNetRequestFeedback') { Fail 'R7 requires declarativeNetRequestFeedback for unpacked-extension matched-rule diagnostics.' }
-if ($launcherText -notmatch 'LATEST\.log' -or $launcherText -notmatch 'pause' -or $launcherText -notmatch 'QS_LOG') { Fail 'R7 durable BAT logging/window-retention contract is missing.' }
+if ($bootstrapCss -notmatch '\.ad-widget') { Fail 'R10 detector contract missing: bootstrap.css must synchronously hide .ad-widget.' }
+if ($bootstrapCss -notmatch '\.native-ad' -or $bootstrapCss -notmatch 'data-sponsored') { Fail 'R10 synchronous native/sponsored cosmetic coverage is missing.' }
+if ($contentJs -notmatch 'scanExplicitSponsored' -or $contentJs -notmatch 'explicit-sponsored') { Fail 'R10 high-confidence sponsored-content filtering contract is missing.' }
+if ($contentJs -match 'labelCandidates|suitableCard\(|semantic-ad-overlay|semantic-sponsored-card') { Fail 'R10 compatibility contract rejected broad semantic ancestor/text hiding.' }
+if ($contentJs -notmatch 'data-qs-bypass' -or $contentJs -notmatch 'trackingParamCleanup') { Fail 'R10 cosmetic bypass or tracking-parameter cleanup contract is missing.' }
+if ($pageGuardJs -notmatch 'window\.open' -or $pageGuardJs -notmatch 'HTMLAnchorElement\.prototype\.click' -or $pageGuardJs -notmatch 'Notification\.requestPermission') { Fail 'R10 popup/redirect/push guard contract is missing.' }
+if ($serviceWorkerJs -notmatch 'getMatchedRules' -or $serviceWorkerJs -notmatch 'testMatchOutcome' -or $serviceWorkerJs -notmatch 'QS_ENGINE_SELF_TEST') { Fail 'R10 exact DNR feedback or Engine Self-Test contract is missing.' }
+if ($popupJs -notmatch 'dnrCategories' -or $popupJs -notmatch 'resolveTargetTab' -or $popupJs -notmatch 'lastAccessed') { Fail 'R10 popup DNR category counters or real-web-tab fallback are missing.' }
+if ($optionsHtml -notmatch 'Protection Engine Self-Test' -or $optionsHtml -notmatch 'runEngineSelfTest') { Fail 'R10 dashboard Engine Self-Test controls are missing.' }
+if (@($adsRules).Count -lt 65) { Fail "R10 ads ruleset is unexpectedly small: $(@($adsRules).Count) rules." }
+if ($adsRulesText -notmatch '/wp-content/plugins/advanced-ads/' -or $adsRulesText -notmatch '/native-ads/' -or $adsRulesText -notmatch 'amazon-adsystem\.com' -or $adsRulesText -notmatch 'ybs2ft75v\.com') { Fail 'R10 third-party/native advertising DNR coverage is missing.' }
+if ($adsRulesText -match 'canyoublockit\.com') { Fail 'R10 must not contain test-site-specific network rules.' }
+if (@($manifest.permissions) -notcontains 'declarativeNetRequestFeedback') { Fail 'R10 requires declarativeNetRequestFeedback for unpacked-extension matched-rule diagnostics.' }
+if ($launcherText -notmatch 'LATEST\.log' -or $launcherText -notmatch 'pause' -or $launcherText -notmatch 'QS_LOG') { Fail 'R10 durable BAT logging/window-retention contract is missing.' }
 
-Write-Host '[PASS] R7 final functional blocker regression contracts passed.' -ForegroundColor Green
-Write-Host '[PASS] R7 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
+Write-Host '[PASS] R10 final functional blocker regression contracts passed.' -ForegroundColor Green
+Write-Host '[PASS] R10 customer-configuration and secret-safety contracts passed.' -ForegroundColor Green
 
 Write-Step 'Create Chrome Load Unpacked folder'
 $loadUnpackedPath = New-LoadUnpackedFolder -ProjectRoot $CanonicalRoot
@@ -488,7 +558,7 @@ Invoke-GitChecked -Arguments @('add', '-A') -FailureMessage 'git add failed for 
 $changes = (& $script:GitExe status --porcelain | Out-String).Trim()
 if ($changes) {
     Invoke-GitChecked `
-        -Arguments @('commit', '-m', "QuietShield Chrome $Version $Revision functional blocker and GUI upgrade") `
+        -Arguments @('commit', '-m', "QuietShield Chrome $Version $Revision publisher scalar-safety hardening") `
         -FailureMessage 'Source repository commit failed.'
 } else {
     Write-Host '[INFO] Source repository has no uncommitted changes.' -ForegroundColor DarkGray

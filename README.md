@@ -1,10 +1,10 @@
-# QuietShield Chrome 1.0.6 R7 — Final Release
+# QuietShield Chrome 1.0.9 R10 — Final Release
 
 QuietShield is a Manifest V3 Chrome extension for local ad, tracker, popup, redirect, nuisance and tracking-parameter protection.
 
 ## Final protection engine
 
-R7 ships five packaged DNR rulesets with 114 validated rules total:
+R10 ships five packaged DNR rulesets with 104 validated rules total:
 
 - Ads: 83 rules, including major advertising/native recommendation networks and high-confidence same-origin ad asset paths.
 - Trackers: 18 rules.
@@ -22,7 +22,7 @@ Some adblock test pages show a static screenshot labelled as an example of a nat
 
 Open QuietShield Dashboard -> Protection -> Protection Engine Self-Test -> Run self-test.
 
-When QuietShield is loaded unpacked, Chrome checks hypothetical requests against the installed DNR engine. R7 tests Google display ads, same-origin ad-insertion assets, native-ad assets, analytics, cryptomining and pop-under networks. All tests should report PASS.
+When QuietShield is loaded unpacked, Chrome checks hypothetical requests against the installed DNR engine. R10 tests Google display ads, same-origin ad-insertion assets, native-ad assets, analytics, cryptomining and pop-under networks. All tests should report PASS.
 
 ## Load unpacked
 
@@ -39,7 +39,7 @@ After running the publisher, the same ready runtime is rebuilt at:
 
 ## Durable publisher
 
-Run `START-PUBLISH-QUIETSHIELD-CHROME-R7.bat` normally, not as Administrator. PowerShell 7 is required.
+Run `START-PUBLISH-QUIETSHIELD-CHROME-R10.bat` normally, not as Administrator. PowerShell 7 is required.
 
 The publisher creates a persistent log before mutation and never relaunches a second BAT. On systems with drive D:, logs are written to:
 
@@ -60,3 +60,8 @@ The matching shared server remains QuietShield License Server 1.2.6 Code372 with
 ## Scope
 
 QuietShield can block a large class of network and cosmetic ads under Chrome Manifest V3, but no browser extension can truthfully guarantee permanent blocking of every first-party advertisement on every site. The release avoids making that claim.
+
+
+## R10 compatibility correction
+
+R10 removes test-site-specific same-origin DNR rules and broad semantic text heuristics introduced in R7. Network blocking is now limited to known ad/tracker domains and third-party ad paths, while cosmetic cleanup uses high-confidence selectors only. This prevents ad blocking from damaging publisher navigation, layout, CSS, or ordinary editorial content.
